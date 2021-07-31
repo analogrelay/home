@@ -1,0 +1,11 @@
+pis:
+  hosts:
+    # These hosts do have mDNS, but they're veeeeery slow
+    biggs.local:
+      ansible_host: 192.168.1.101
+    wedge.local:
+      ansible_host: 192.168.1.102
+    barret.local:
+      ansible_host: 192.168.1.103
+  vars:
+    ansible_user: ubuntu
