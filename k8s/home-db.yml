@@ -1,0 +1,70 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: home-db
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: home-db-pvc
+  namespace: home-db
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "nfs-client" # nfs-client is default value of helm chart, change accordingly
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb
+  namespace: home-db 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      # TODO: Memory limits to ensure it gets on a node with sufficient capacity.
+      containers:
+      - image: mariadb:10.6.3
+        name: mariadb
+        env:
+          # Use secret in real usage
+        - name: MARIADB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: database-credentials
+              key: root-password
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mariadb-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mariadb-persistent-storage
+        persistentVolumeClaim:
+          claimName: home-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: home-db
+spec:
+  selector:
+    app: mariadb
+  type: LoadBalancer
+  loadBalancerIP: 192.168.2.2
+  ports:
+  - port: 3306
