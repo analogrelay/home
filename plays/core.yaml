@@ -1,0 +1,29 @@
+---
+- name: Core Pi Configuration
+  hosts: pis
+  tasks:
+  - name: Enable HTTPS APT support
+    become: yes
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - apt-transport-https
+      - ca-certificates
+      - software-properties-common
+  - name: Update apt package list
+    become: yes
+    apt:
+      update_cache: yes
+    register: apt_update
+    retries: 5
+    until: apt_update is success
+
+  - name: Install packages
+    become: yes
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - avahi-daemon
+      - nfs-common
