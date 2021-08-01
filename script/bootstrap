@@ -1,8 +1,32 @@
 #!/usr/bin/env bash
+root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
+cd $root
 
 if ! type ansible >/dev/null 2>&1; then
     echo "ansible is not installed!" 1>&2
     exit 1
 fi
 
+echo "==> installing ansible requirements..."
 ansible-galaxy install -r requirements.yaml
+
+[ -d ".secrets" ] || mkdir ".secrets"
+
+kubectl="kubectl --context=home"
+
+# Home DB (Postgres) initialization
+if ! $kubectl get ns home-db >/dev/null 2>&1; then
+    echo "==> creating home-db namespace..."
+    $kubectl create ns home-db
+fi
+
+if ! $kubectl get --namespace home-db secret database-credentials >/dev/null 2>&1; then
+    echo "==> initializing database-credentials secret..."
+
+    [ -d ".secrets/database-credentials" ] || mkdir ".secrets/database-credentials"
+    if [ ! -f ".secrets/database-credentials/root-password" ]; then
+        openssl rand -base64 32 | tr -d '\n\r' > ".secrets/database-credentials/root-password"
+    fi
+
+    kubectl create --namespace home-db secret generic database-credentials --from-file="./.secrets/database-credentials"
+fi
