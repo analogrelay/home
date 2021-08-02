@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
 
+set -euo pipefail
+
 helmfile apply
 
-for file in "$(find "$root/k8s" \( -name "*.yml" -or -name "*.yaml" \) -type f)"; do
+find -s "$root/k8s" \( -name "*.yml" -or -name "*.yaml" \) -type f -print0 | while read -d $'\0' file; do
     echo "==> applying $file ..."
     kubectl apply -f $file
 done
