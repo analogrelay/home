@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Copies cloud-init content to the attached volume
+root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
+
+volume="/Volumes/system-boot"
+
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    shift
+
+    case "$key" in
+        -v|--volume)
+            volume="$1"
+            shift
+            ;;
+    esac
+done
+
+echo "Copying cloud init files from $root/cloud-init to $volume"
+cp -R $root/cloud-init/* $volume

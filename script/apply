@@ -1,11 +1,44 @@
 #!/usr/bin/env bash
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
 
+context="home"
+kubectl="kubectl --context=$context"
+helmfile="helmfile --kube-context=$context"
+
+dry_run=false
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    shift
+
+    case "$key" in
+        -n|--dry-run)
+            dry_run=true
+            ;;
+    esac
+done
+
 set -euo pipefail
 
-helmfile apply
+if $dry_run; then
+    echo "==> diffing helmfile"
+    $helmfile diff
+else
+    echo "==> applying helmfile"
+    $helmfile apply
+fi
 
 find -s "$root/k8s" \( -name "*.yml" -or -name "*.yaml" \) -type f -print0 | while read -d $'\0' file; do
-    echo "==> applying $file ..."
-    kubectl apply -f $file
+    if $dry_run; then
+        echo "==> diffing $file ..."
+        # '|| true' ==> ignore a non-zero exit code.
+        $kubectl diff -f $file || true
+    else
+        echo "==> applying $file ..."
+        $kubectl apply -f $file
+    fi
 done
+
+echo "==> reloading prometheus config"
+if ! $dry_run; then
+    $kubectl --namespace prometheus exec -it deployment/prometheus-deployment -- kill -1 1
+fi
