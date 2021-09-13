@@ -1,18 +1,8 @@
 repositories:
-  - name: ingress-nginx
-    url: https://kubernetes.github.io/ingress-nginx
   - name: nfs-subdir-external-provisioner
     url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
   
 releases:
-  - name: ingress-nginx
-    namespace: ingress-nginx
-    chart: ingress-nginx/ingress-nginx
-    version: 3.34.0
-    values:
-    - controller:
-        service:
-          loadBalancerIP: 192.168.2.1
   - name: nfs-subdir-external-provisioner
     namespace: nfs-subdir-external-provisioner
     chart: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner

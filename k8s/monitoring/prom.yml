@@ -1,22 +1,8 @@
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: prometheus-pvc
-  namespace: prometheus
-  annotations:
-    volume.beta.kubernetes.io/storage-class: "nfs-client" # nfs-client is default value of helm chart, change accordingly
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 1Gi
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus-deployment
-  namespace: prometheus
+  namespace: monitoring
   labels:
     app: prometheus-server
 spec:
@@ -41,10 +27,10 @@ spec:
           resources:
             requests:
               cpu: 500m
-              memory: 500Mi
+              memory: 2Gi
             limits:
               cpu: 1
-              memory: 1Gi
+              memory: 4Gi
           volumeMounts:
             - name: prometheus-config-volume
               mountPath: /etc/prometheus/
@@ -57,14 +43,15 @@ spec:
             name: prometheus-server-conf
   
         - name: prometheus-storage-volume
-          persistentVolumeClaim:
-            claimName: prometheus-pvc
+          nfs:
+            server: 192.168.1.106
+            path: /volume1/k8s/prometheus
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
-  namespace: prometheus
+  namespace: monitoring
 spec:
   ports:
     - port: 9090
@@ -72,3 +59,33 @@ spec:
       protocol: TCP
   selector:
     app: prometheus-server
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-prometheus-prefix
+  namespace: monitoring
+spec:
+  stripPrefix:
+    prefixes:
+      - /prometheus
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  entryPoints:
+    - web
+  middlewares:
+    - name: strip-prometheus-prefix
+      namespace: prometheus
+  routes:
+    - kind: Rule
+      match: PathPrefix(`/prometheus`) 
+      services:
+        - kind: Service
+          name: prometheus
+          namespace: monitoring
+          port: 9090

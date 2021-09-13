@@ -1,0 +1,77 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: mosquitto
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mosquitto-conf
+  namespace: mosquitto
+data:
+  mosquitto.conf: |-
+    persistence true
+    persistence_location /mosquitto/data
+
+    listener 1883
+    protocol mqtt
+    allow_anonymous true
+
+    listener 9001
+    protocol websockets
+    allow_anonymous true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  namespace: mosquitto 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+    spec:
+      containers:
+      - image: eclipse-mosquitto:2.0.11
+        name: mosquitto
+        ports:
+          - containerPort: 1883
+            name: mqtt
+          - containerPort: 9001
+            name: mqtt-ws
+        volumeMounts:
+          - name: persistent-storage
+            mountPath: /mosquitto/data
+          - name: config-volume
+            mountPath: /mosquitto/config
+      volumes:
+        - name: persistent-storage
+          nfs:
+            server: 192.168.1.106
+            path: /volume1/k8s/mosquitto
+        - name: config-volume
+          configMap:
+            defaultMode: 420
+            name: mosquitto-conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto
+  namespace: mosquitto
+spec:
+  selector:
+    app: mosquitto
+  type: LoadBalancer
+  ports:
+    - port: 1883
+      name: mqtt
+    - port: 9001
+      name: mqtt-ws

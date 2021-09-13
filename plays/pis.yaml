@@ -2,6 +2,11 @@
 - name: Core Pi Configuration
   hosts: pis
   tasks:
+  - name: Set Hostname
+    become: yes
+    hostname:
+      name: "{{ inventory_hostname }}"
+      use: systemd
   - name: Enable HTTPS APT support
     become: yes
     apt:
@@ -11,6 +16,7 @@
       - apt-transport-https
       - ca-certificates
       - software-properties-common
+
   - name: Update apt package list
     become: yes
     apt:
@@ -18,7 +24,6 @@
     register: apt_update
     retries: 5
     until: apt_update is success
-
   - name: Install packages
     become: yes
     apt:

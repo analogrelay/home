@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zwave2mqtt
+  namespace: home-assistant
+  labels:
+    app: zwave2mqtt
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: zwave2mqtt
+  template:
+    metadata:
+      labels:
+        app: zwave2mqtt
+    spec:
+      containers:
+        - name: zwave2mqtt
+          image: "zwavejs/zwavejs2mqtt:5.4.5"
+          ports:
+            - name: http
+              containerPort: 8091
+              protocol: TCP
+            - name: ws
+              containerPort: 3000
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 300Mi
+            limits:
+              cpu: 1
+              memory: 400Mi
+              smarter-devices/zwave: 1
+          volumeMounts:
+            - mountPath: /usr/src/app/store
+              name: persistent-storage
+      volumes:
+        - name: persistent-storage
+          nfs:
+            server: 192.168.1.106
+            path: /volume1/k8s/zwavejs2mqtt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zwave2mqtt
+  namespace: home-assistant
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+    - name: ws
+      port: 3000
+      targetPort: ws
+  selector:
+    app: zwave2mqtt

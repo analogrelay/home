@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home-assistant-deployment
+  namespace: home-assistant
+  labels:
+    app: home-assistant
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: home-assistant
+  template:
+    metadata:
+      labels:
+        app: home-assistant
+    spec:
+      containers:
+        - name: homeassistant
+          image: "homeassistant/home-assistant:2021.8"
+          env:
+            - name: TZ
+              value: "America/Vancouver"
+          ports:
+            - name: http
+              containerPort: 8123
+              protocol: TCP
+          volumeMounts:
+            - name: hass-persistent-storage
+              mountPath: /config
+          resources:
+            requests:
+              cpu: 500m
+              memory: 800Mi
+            limits:
+              cpu: 1
+              memory: 1.25Gi
+      volumes:
+        - name: hass-config-volume
+          configMap:
+            defaultMode: 420
+            name: home-assistant-conf
+        - name: hass-persistent-storage
+          nfs:
+            server: 192.168.1.106
+            path: /volume1/k8s/home-assistant
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+spec:
+  type: ClusterIP
+  selector:
+    app: home-assistant
+  ports:
+  - port: 8123
+    targetPort: http
+    protocol: TCP
+    name: http
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: home-assistant
+  namespace: home-assistant
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host("home.local.analogrelay.net")
+      services:
+        - kind: Service
+          name: home-assistant
+          namespace: home-assistant
+          port: 8123

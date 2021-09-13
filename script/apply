@@ -40,5 +40,5 @@ done
 
 echo "==> reloading prometheus config"
 if ! $dry_run; then
-    $kubectl --namespace prometheus exec -it deployment/prometheus-deployment -- kill -1 1
+    $kubectl --namespace monitoring exec -it deployment/prometheus-deployment -- kill -1 1
 fi
