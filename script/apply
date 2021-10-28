@@ -3,7 +3,6 @@ root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
 
 context="home"
 kubectl="kubectl --context=$context"
-helmfile="helmfile --kube-context=$context"
 
 dry_run=false
 while [[ $# -gt 0 ]]; do
@@ -18,14 +17,6 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -euo pipefail
-
-if $dry_run; then
-    echo "==> diffing helmfile"
-    $helmfile diff
-else
-    echo "==> applying helmfile"
-    $helmfile apply
-fi
 
 find -s "$root/k8s" \( -name "*.yml" -or -name "*.yaml" \) -type f -print0 | while read -d $'\0' file; do
     if $dry_run; then

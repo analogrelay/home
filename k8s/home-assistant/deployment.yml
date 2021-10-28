@@ -17,6 +17,9 @@ spec:
       labels:
         app: home-assistant
     spec:
+      # Put this pod on 'barret', since it has the avahi reflector runing for mdns
+      nodeSelector:
+        kubernetes.io/hostname: barret.local.analogrelay.net
       containers:
         - name: homeassistant
           image: "homeassistant/home-assistant:2021.8"
