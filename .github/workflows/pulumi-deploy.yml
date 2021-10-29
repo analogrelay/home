@@ -2,8 +2,8 @@ name: Pulumi
 on:
   - deployment
 jobs:
-  preview:
-    name: Preview
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
