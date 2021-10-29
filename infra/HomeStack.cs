@@ -11,6 +11,7 @@ class HomeStack : Stack
     private static List<(string Name, string[] IPs)> LocalARecords = new List<(string, string[])>()
     {
         ("biggs", new[] { "192.168.1.101" }),
+        ("boggs", new[] { "192.168.1.101" }),
         ("wedge", new[] { "192.168.1.102" }),
         ("barret", new[] { "192.168.1.103" }),
         ("cid", new[] { "192.168.1.106" }),
