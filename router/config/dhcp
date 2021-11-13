@@ -1,0 +1,73 @@
+
+config dnsmasq
+	option domainneeded '1'
+	option localise_queries '1'
+	option rebind_protection '1'
+	option local '/lan/'
+	option domain 'lan'
+	option expandhosts '1'
+	option authoritative '1'
+	option readethers '1'
+	option leasefile '/tmp/dhcp.leases'
+	option resolvfile '/tmp/resolv.conf.d/resolv.conf.auto'
+	option localservice '1'
+	option ednspacket_max '1232'
+	list rebind_domain 'local.analogrelay.net'
+
+config dhcp 'lan'
+	option interface 'lan'
+	option start '100'
+	option limit '150'
+	option leasetime '12h'
+	option dhcpv4 'server'
+	option dhcpv6 'server'
+	option ra 'server'
+	option ra_slaac '1'
+	list ra_flags 'managed-config'
+	list ra_flags 'other-config'
+
+config dhcp 'wan'
+	option interface 'wan'
+	option ignore '1'
+
+config odhcpd 'odhcpd'
+	option maindhcp '0'
+	option leasefile '/tmp/hosts/odhcpd'
+	option leasetrigger '/usr/sbin/odhcpd-update'
+	option loglevel '4'
+
+config host
+	option name 'midgar'
+	option mac '38:94:ED:61:A3:28'
+	option ip '192.168.1.2'
+
+config host
+	option name 'tifa'
+	option dns '1'
+	option mac 'E4:5F:01:46:2A:86'
+	option ip '192.168.1.109'
+
+config host
+	option name 'jessie'
+	option dns '1'
+	option mac 'E4:5F:01:46:2A:77'
+	option ip '192.168.1.108'
+
+config host
+	option name 'barret'
+	option dns '1'
+	option mac 'DC:A6:32:E9:A7:9E'
+	option ip '192.168.1.103'
+
+config host
+	option name 'wedge'
+	option dns '1'
+	option mac 'E4:5F:01:32:74:53'
+	option ip '192.168.1.102'
+
+config host
+	option name 'cid'
+	option dns '1'
+	option mac '00:11:32:24:87:9D'
+	option ip '192.168.1.106'
+

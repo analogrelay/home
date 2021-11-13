@@ -1,0 +1,10 @@
+---
+- name: Router configuration
+  hosts: router
+  tasks:
+  - name: Install packages
+    community.general.opkg:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - "rsync"
