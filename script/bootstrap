@@ -30,3 +30,7 @@ if ! $kubectl get --namespace home-db secret database-credentials >/dev/null 2>&
 
     kubectl create --namespace home-db secret generic database-credentials --from-file="./.secrets/database-credentials"
 fi
+
+bundle install
+
+bundle exec librarian-ansible install

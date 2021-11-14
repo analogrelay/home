@@ -71,3 +71,8 @@ config host
 	option mac '00:11:32:24:87:9D'
 	option ip '192.168.1.106'
 
+config host
+	option name 'Living-Room'
+	option ip '192.168.1.211'
+	option mac 'F0:B3:EC:3F:6C:E0'
+

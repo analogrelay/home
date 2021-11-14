@@ -23,9 +23,22 @@ config zone
 	option masq		1
 	option mtu_fix		1
 
+config zone
+	option name		vpnfirewall
+	list   network		'nordvpn'
+	option input 	REJECT
+	option output	ACCEPT
+	option forward	REJECT
+	option masq		1
+	option mtu_fix	1
+
 config forwarding
 	option src		lan
 	option dest		wan
+
+config forwarding
+	option src		lan
+	option dest		vpnfirewall
 
 # We need to accept udp packets on port 68,
 # see https://dev.openwrt.org/ticket/4108

@@ -1,0 +1,4 @@
+
+config openvpn 'nordvpn_canada'
+	option config '/etc/openvpn/ca1245.nordvpn.com.tcp.ovpn'
+	option enabled '1'

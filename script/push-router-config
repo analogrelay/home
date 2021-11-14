@@ -2,4 +2,9 @@
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
 cd $root
 
-rsync -av -e "ssh" "$root/router/config/" root@gaia.lan:/etc/config
+dirs=$(find ./router/etc -type d -maxdepth 1 -mindepth 1 -execdir echo '{}' ';')
+
+for dir in $dirs; do
+    echo "Pushing $dir"
+    rsync -av --no-owner -e "ssh" "$root/router/etc/$dir/" "root@gaia.lan:/etc/$dir"
+done

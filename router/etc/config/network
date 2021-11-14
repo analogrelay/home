@@ -30,8 +30,15 @@ config device
 config interface 'wan'
 	option device 'wan'
 	option proto 'dhcp'
+	list dns '103.86.96.100'
+	list dns '103.86.99.100'
+	list dns '8.8.8.8'
+	list dns '8.8.4.4'
 
 config interface 'wan6'
 	option device 'wan'
 	option proto 'dhcpv6'
 
+config interface 'nordvpnca'
+	option device 'vpn-ca'
+	option proto 'none'
