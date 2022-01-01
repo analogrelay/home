@@ -22,12 +22,17 @@ spec:
       labels:
         app: plex
     spec:
+      # Temporarily put this pod on 'barret', since we're having networking issues...
+      nodeSelector:
+        kubernetes.io/hostname: barret.local.analogrelay.net
       containers:
         - name: plex
-          image: "ghcr.io/linuxserver/plex"
+          image: "lscr.io/linuxserver/plex"
           env:
             - name: VERSION
               value: "docker"
+            - name: HOSTNAME
+              value: "plex.local.analogrelay.net"
           ports:
             - name: http
               containerPort: 32400
@@ -79,9 +84,6 @@ spec:
   routes:
     - kind: Rule
       match: Host("plex.local.analogrelay.net")
-      middlewares:
-        - name: strip-plex-prefix
-          namespace: plex
       services:
         - kind: Service
           name: plex
