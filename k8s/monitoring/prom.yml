@@ -15,6 +15,16 @@ spec:
       labels:
         app: prometheus-server
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              preference:
+                matchExpressions:
+                  - key: analogrelay.net/cloud
+                    operator: In
+                    values:
+                      - "true"
       containers:
         - name: prometheus
           image: prom/prometheus
@@ -78,12 +88,12 @@ metadata:
 spec:
   entryPoints:
     - web
-  middlewares:
-    - name: strip-prometheus-prefix
-      namespace: prometheus
   routes:
     - kind: Rule
       match: PathPrefix(`/prometheus`) 
+      middlewares:
+        - name: strip-prometheus-prefix
+          namespace: prometheus
       services:
         - kind: Service
           name: prometheus

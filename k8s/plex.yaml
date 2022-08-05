@@ -22,9 +22,17 @@ spec:
       labels:
         app: plex
     spec:
-      # Temporarily put this pod on 'barret', since we're having networking issues...
-      nodeSelector:
-        kubernetes.io/hostname: barret.local.analogrelay.net
+      # Don't run this in THE CLOUD
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              preference:
+                matchExpressions:
+                  - key: analogrelay.net/cloud
+                    operator: NotIn
+                    values:
+                      - "true"
       containers:
         - name: plex
           image: "lscr.io/linuxserver/plex"

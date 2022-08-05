@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Joins the target node as a worker to the k3s cluster
+
+worker=
+server=192.168.1.3
+
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    shift
+
+    case "$key" in
+        --server)
+            server="$1"
+            shift
+            ;;
+        *)
+            worker="$key"
+            ;;
+    esac
+done
+
+if [[ -z "$worker" ]]; then
+    echo "Usage: $0 <worker>"
+    exit 1
+fi
+
+worker_ip=$(dig -4 -t A $worker +short)
+
+echo "Installing k3s-agent on $worker (IP: $worker_ip)"
+echo "  Linking with server $server"
+
+if ! type k3sup >/dev/null 2>&1; then
+    echo "Missing k3sup, please install it first"
+    exit 1
+fi
+
+k3sup join \
+  --ip $worker_ip \
+  --user ubuntu \
+  --sudo \
+  --k3s-channel stable \
+  --server \
+  --server-ip $server \
+  --server-user ubuntu \
+  --sudo \
+  --k3s-extra-args "--no-deploy=traefik --no-deploy=servicelb --flannel-iface=eth0 --node-ip=$worker_ip"

@@ -7,6 +7,8 @@ data:
   conf.yaml: |
     - devicematch: ^zwave$
       nummaxdevices: 1
+    - devicematch: ^rtl433$
+      nummaxdevices: 1
 ---
 apiVersion: apps/v1
 kind: DaemonSet

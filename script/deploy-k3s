@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Deploys k3s to the target server
+
+server=
+
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    shift
+
+    case "$key" in
+        *)
+            server="$key"
+            ;;
+    esac
+done
+
+if [[ -z "$server" ]]; then
+    echo "Usage: $0 <server>"
+    exit 1
+fi
+
+ip=$(dig -4 -t A $server +short)
+
+echo "Installing k3s on $server (IP: $ip)"
+
+if ! type k3sup >/dev/null 2>&1; then
+    echo "Missing k3sup, please install it first"
+    exit 1
+fi
+
+k3sup install \
+    --ip=$ip \
+    --user=ubuntu \
+    --sudo \
+    --tls-san=192.168.2.1 \
+    --cluster \
+    --k3s-channel=stable \
+    --k3s-extra-args "--no-deploy=traefik --no-deploy=servicelb --flannel-iface=eth0 --node-ip=$ip" \
+    --merge \
+    --local-path "$HOME/.kube/config" \
+    --context=k3s-home
+

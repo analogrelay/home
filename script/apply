@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
 
-context="home"
+context="k3s-home"
 kubectl="kubectl --context=$context"
 
 dry_run=false
@@ -17,6 +17,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 set -euo pipefail
+
+helmfile apply
 
 find -s "$root/k8s" \( -name "*.yml" -or -name "*.yaml" \) -type f -print0 | while read -d $'\0' file; do
     if $dry_run; then

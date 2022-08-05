@@ -12,6 +12,18 @@ data:
       evaluation_interval: 30s
 
     scrape_configs:
+      - job_name: Home
+        scrape_interval: 60s
+        metrics_path: /api/prometheus
+        bearer_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI0NjcyOGE2YmFjYjE0NTE2Yjg5OGQyMzMyN2Y5NzAyYyIsImlhdCI6MTY0NTMwMTMxMiwiZXhwIjoxOTYwNjYxMzEyfQ.veLPdrwi8xJmelBJrwWra9NRGALWjDXZ7q1FAod0fTc'
+        scheme: http
+        static_configs:
+          - targets: ['home.local.analogrelay.net']
+
+      - job_name: OpenWrt
+        static_configs:
+          - targets: ['gaia.local.analogrelay.net:9100']
+
       - job_name: 'prometheus'
         scrape_interval: 10s
         static_configs:

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: rtl-433
+  name: rtl-433
+  namespace: radio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rtl-433
+  template:
+    metadata:
+      labels:
+        app: rtl-433
+    spec:
+      # Put this pod on 'barret', since it has the radio connected.
+      nodeSelector:
+        kubernetes.io/hostname: barret.local.analogrelay.net
+      containers:
+        - name: rtl-433
+          image: hertzg/rtl_433:21.05-alpine3
+          imagePullPolicy: IfNotPresent
+          ports:
+          volumeMounts:
+            - mountPath: /dev/bus/usb
+              name: host-usb
+            - mountPath: /etc/rtl_433
+              name: rtl-433-config-volume
+          securityContext:
+            privileged: true
+      volumes:
+        - name: host-usb
+          hostPath:
+            path: /dev/bus/usb
+            type: Directory
+        - name: rtl-433-config-volume
+          configMap:
+            defaultMode: 420
+            name: rtl-433-conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rtl-433-conf
+  labels:
+    name: rtl-433-conf
+  namespace: radio
+data:
+  rtl_433.conf: |-
+    frequency 433.92M
+    frequency 915M
+    hop_interval 120
+
+    output mqtt://mosquitto.mosquitto.svc.cluster.local:1883,retain=1,devices=rtl_433/devices/T_[type]/M_[model]/S_[subtype]/C_[channel]/[id],events=rtl_433/events[/id],states=rtl_433/states[/id]
+    output json
+
+    report_meta time:unix:usec:utc
+    report_meta protocol
+    report_meta level
+    report_meta noise
+    report_meta stats

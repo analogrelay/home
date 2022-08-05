@@ -9,8 +9,12 @@ pis:
     tifa.local.analogrelay.net:
       ansible_user: ubuntu
 k8s:
-  hosts:
-    wedge.local.analogrelay.net:
-    barret.local.analogrelay.net:
-    jessie.local.analogrelay.net:
-    tifa.local.analogrelay.net:
+  children:
+    primary:
+      hosts:
+        barret.local.analogrelay.net
+    workers:
+      hosts:
+        wedge.local.analogrelay.net:
+        jessie.local.analogrelay.net:
+        tifa.local.analogrelay.net:

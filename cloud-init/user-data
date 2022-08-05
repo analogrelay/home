@@ -31,3 +31,5 @@ ssh_pwauth: true
 # the default user
 ssh_import_id:
 - gh:anurse
+
+prefer_fqdn_over_hostname: true
