@@ -1,0 +1,21 @@
+#!/bin/bash
+# Enters NIXOS environment via docker
+root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
+
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    shift
+
+    case "$key" in
+        -p|--platform)
+            platform="$1"
+            shift
+            ;;
+    esac
+done
+
+args=()
+if [[ -n "$platform" ]]; then
+    args+=("--platform" "$platform")
+fi
+docker run -it --rm "${args[@]}" -v "$root/nix:/root/nix" nixos/nix

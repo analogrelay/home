@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 import * as tls from "@pulumi/tls";
-import { resources, keyvault, network, compute, managedidentity, authorization, security } from "@pulumi/azure-native";
+import { resources, keyvault, network, compute } from "@pulumi/azure-native";
 
 import * as directory from "./directory";
 
@@ -31,26 +31,12 @@ const vault = new keyvault.Vault("vault-compute", {
     }
 });
 
-const adminSshKey = new tls.PrivateKey("key-compute-admin-ssh", {
-    algorithm: "RSA",
-    rsaBits: 2048,
-});
-
-new keyvault.Secret("secret-compute-ssh-private", {
-    secretName: "Compute-AdminSSH-PrivateKey",
-    resourceGroupName: computeResourceGroup.name,
-    vaultName: vault.name,
-    properties: {
-        value: adminSshKey.privateKeyOpenssh,
-    },
-});
-
 new keyvault.Secret("secret-compute-ssh-public", {
     secretName: "Compute-AdminSSH-PublicKey",
     resourceGroupName: computeResourceGroup.name,
     vaultName: vault.name,
     properties: {
-        value: adminSshKey.publicKeyOpenssh,
+        value: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDXw744SbN4l1exPX2TShnbrk/I7GJH5Ku8ebdg8qiAn",
     },
 });
 
@@ -67,10 +53,6 @@ const vmSubnet = new network.Subnet("subnet-meteor-vms", {
     resourceGroupName: computeResourceGroup.name,
     virtualNetworkName: vnet.name,
     addressPrefix: "10.0.1.0/24",
-});
-
-const cloudInit = fs.readFile("./assets/meteor.cloudinit.yml", "utf8").then(content => {
-    return Buffer.from(content).toString("base64");
 });
 
 export const meteorIp = new network.PublicIPAddress("ip-meteor-01", {
@@ -111,54 +93,54 @@ export const meteorNic = new network.NetworkInterface("nic-meteor-01", {
     }],
 });
 
-const vm = new compute.VirtualMachine("vm-meteor-01", {
-    resourceGroupName: computeResourceGroup.name,
-    hardwareProfile: {
-        vmSize: "Standard_D2as_v5",
-    },
-    networkProfile: {
-        networkInterfaces: [{
-            id: meteorNic.id,
-            primary: true,
-        }],
-    },
-    identity: {
-        type: compute.ResourceIdentityType.SystemAssigned,
-    },
-    osProfile: {
-        adminUsername: "meteoradmin",
-        computerName: "meteor-01",
-        linuxConfiguration: {
-            ssh: {
-                publicKeys: [{
-                    path: "/home/meteoradmin/.ssh/authorized_keys",
-                    keyData: adminSshKey.publicKeyOpenssh,
-                }],
-            },
-            disablePasswordAuthentication: true,
-            provisionVMAgent: true,
-        },
-        customData: cloudInit,
-    },
-    storageProfile: {
-        osDisk: {
-            createOption: compute.DiskCreateOption.FromImage,
-            name: "disk-meteor-01",
-        },
-        imageReference: {
-            publisher: "canonical",
-            offer: "0001-com-ubuntu-server-focal",
-            sku: "20_04-lts-gen2",
-            version: "latest",
-        }
-    },
-});
+// const vm = new compute.VirtualMachine("vm-meteor-01", {
+//     resourceGroupName: computeResourceGroup.name,
+//     hardwareProfile: {
+//         vmSize: "Standard_D2as_v5",
+//     },
+//     networkProfile: {
+//         networkInterfaces: [{
+//             id: meteorNic.id,
+//             primary: true,
+//         }],
+//     },
+//     identity: {
+//         type: compute.ResourceIdentityType.SystemAssigned,
+//     },
+//     osProfile: {
+//         adminUsername: "meteoradmin",
+//         computerName: "meteor-01",
+//         linuxConfiguration: {
+//             ssh: {
+//                 publicKeys: [{
+//                     path: "/home/meteoradmin/.ssh/authorized_keys",
+//                     keyData: adminSshKey.publicKeyOpenssh,
+//                 }],
+//             },
+//             disablePasswordAuthentication: true,
+//             provisionVMAgent: true,
+//         },
+//         customData: cloudInit,
+//     },
+//     storageProfile: {
+//         osDisk: {
+//             createOption: compute.DiskCreateOption.FromImage,
+//             name: "disk-meteor-01",
+//         },
+//         imageReference: {
+//             publisher: "canonical",
+//             offer: "0001-com-ubuntu-server-focal",
+//             sku: "20_04-lts-gen2",
+//             version: "latest",
+//         }
+//     },
+// });
 
-new compute.VirtualMachineExtension("vmx-meteor-01-aadssh", {
-    resourceGroupName: computeResourceGroup.name,
-    vmName: vm.name,
-    publisher: "Microsoft.Azure.ActiveDirectory",
-    type: "AADSSHLoginForLinux",
-    typeHandlerVersion: "1.0",
-    autoUpgradeMinorVersion: true,
-});
+// new compute.VirtualMachineExtension("vmx-meteor-01-aadssh", {
+//     resourceGroupName: computeResourceGroup.name,
+//     vmName: vm.name,
+//     publisher: "Microsoft.Azure.ActiveDirectory",
+//     type: "AADSSHLoginForLinux",
+//     typeHandlerVersion: "1.0",
+//     autoUpgradeMinorVersion: true,
+// });

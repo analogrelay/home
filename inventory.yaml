@@ -1,20 +1,13 @@
-pis:
+all:
+  vars:
+    ansible_user: abby
   hosts:
-    wedge.local.analogrelay.net:
-      ansible_user: ubuntu
-    barret.local.analogrelay.net:
-      ansible_user: ubuntu
-    jessie.local.analogrelay.net:
-      ansible_user: ubuntu
-    tifa.local.analogrelay.net:
-      ansible_user: ubuntu
-k8s:
   children:
-    primary:
-      hosts:
-        barret.local.analogrelay.net
-    workers:
-      hosts:
-        wedge.local.analogrelay.net:
-        jessie.local.analogrelay.net:
-        tifa.local.analogrelay.net:
+    nomads:
+      children:
+        servers:
+          hosts:
+            biggs.home.analogrelay.net:
+              ansible_host: 192.168.2.5
+            reno.home.analogrelay.net:
+              ansible_host: 192.168.2.6

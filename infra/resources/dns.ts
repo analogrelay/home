@@ -9,19 +9,18 @@ const dnsResourceGroup = new resources.ResourceGroup("analogcloud-dns", {
 });
 
 const aRecords: {name: string, ips: pulumi.Input<pulumi.Input<string>[]> }[] = [
+    { name: "biggs.home", ips: ["192.168.2.5"] },
+    { name: "reno.home", ips: ["192.168.2.6"] },
+
+    // Old nodes
     { name: "gaia.local", ips: ["192.168.1.1"] },
-    { name: "biggs.local", ips: ["192.168.1.101"] },
     { name: "wedge.local", ips: ["192.168.1.102"] },
     { name: "barret.local", ips: ["192.168.1.103"] },
     { name: "cid.local", ips: ["192.168.1.106"] },
     { name: "jessie.local", ips: ["192.168.1.108"] },
-    { name: "reno.local", ips: ["192.168.1.110"] },
     { name: "tifa.local", ips: ["192.168.1.109"] },
     { name: "k8s.local", ips: ["192.168.1.3"] },
     { name: "traefik.local", ips: ["192.168.2.91"] },
-    { name: "mosquitto.local", ips: ["192.168.2.5"] },
-    { name: "meteor", ips: [meteorIp.ipAddress.apply(ip => ip!)] },
-    { name: "meteor-01.cloud", ips: [meteorNic.ipConfigurations.apply(ip => ip![0].privateIPAddress!)] },
 ];
 
 const cnameRecords: {name: string, value: pulumi.Input<string> }[] = [
