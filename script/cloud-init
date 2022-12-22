@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-# Copies cloud-init content to the attached volume
+# Generates a cloud-init and copies it to the SD card
 root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
-
 volume="/Volumes/system-boot"
 
 while [[ $# -gt 0 ]]; do
@@ -17,16 +16,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "Copying cloud init files from $root/cloud-init to $volume"
+
 cp -R $root/cloud-init/* $volume
 
 if [[ -f $volume/user-data ]]; then
     if ! grep "^fqdn:" $volume/user-data > /dev/null; then
         echo -n "Enter the simple hostname for this node (without domain): "
         read hostname
-        fqdn="$hostname.local.analogrelay.net"
+        fqdn="$hostname.home.analogrelay.net"
         echo "Ok, I'll set the fqdn of this node to: $fqdn"
 
         echo "fqdn: $fqdn" >> $volume/user-data
+        echo "hostname: $hostname" >> $volume/user-data
     fi
 fi
 
