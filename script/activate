@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
+cd $root
+
+# Make sure we have nix
+if ! type nix-shell > /dev/null; then
+    echo "Nix is not installed. Please install it first."
+    echo "Because Nix is kinda complex and broad-reaching, we don't install it for you."
+    exit 1
+fi
+
+# We need to allow broken packages because of an issue with the Python3.10 package
+# https://github.com/NixOS/nixpkgs/issues/174457
+NIXPKGS_ALLOW_BROKEN=1 nix-shell --impure
