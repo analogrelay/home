@@ -1,0 +1,12 @@
+#!/usr/bin/env ansible-playbook -i inventory.yaml
+---
+- hosts: servers
+  roles:
+    - role: core
+- hosts: consul_servers
+  roles:
+    - role: consul
+      consul_is_server: yes
+- hosts: servers:!consul_servers
+  roles:
+    - role: consul

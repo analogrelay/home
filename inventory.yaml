@@ -10,22 +10,23 @@ all:
           hosts:
             gaia.home.analogrelay.net:
               ansible_host: 192.168.1.1
-            wutai.home.analogrelay.net:
-              ansible_host: 192.168.1.2
-        orbi:
-          hosts:
-            kalm.home.analogrelay.net:
-              ansible_host: 192.168.1.3
-            midgar.home.analogrelay.net:
-              ansible_host: 192.168.1.4
+              ansible_user: root
     servers:
       children:
-        avalanche:
-          hosts:
-            jessie.home.analogrelay.net:
-              ansible_host: 192.168.2.1
-            tifa.home.analogrelay.net:
-              ansible_host: 192.168.2.2
+        cluster:
+          children:
+            consul_servers:
+              hosts:
+                jessie.home.analogrelay.net:
+                tifa.home.analogrelay.net:
+            nomad_servers:
+              hosts:
+                jessie.home.analogrelay.net:
+                  ansible_host: 192.168.2.1
+            nomad_agents:
+              hosts:
+                tifa.home.analogrelay.net:
+                  ansible_host: 192.168.2.2
         turks:
           hosts:
             rude.home.analogrelay.net:

@@ -1,0 +1,13 @@
+ui = true
+datacenter = "{{ consul_dc }}"
+bind_addr = "{{ consul_bind }}"
+advertise_addr = "{{ consul_advertise }}"
+node_name = "{{ ansible_hostname }}"
+rejoin_after_leave = true
+recursors = [ "8.8.8.8", "8.8.4.4" ]
+retry_join = [ {{ consul_nodes }} ]
+{% if consul_is_server %}
+server = true
+bootstrap_expect = {{ consul_node_count }}
+{% endif %}
+data_dir = "/var/lib/consul"
