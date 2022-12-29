@@ -4,3 +4,8 @@
   service:
     name: consul
     state: restarted
+- name: Restart Systemd-resolved
+  become: true
+  service:
+    name: systemd-resolved
+    state: restarted

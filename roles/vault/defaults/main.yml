@@ -1,0 +1,10 @@
+---
+vault_version: "1.12.2"
+vault_arch_map:
+  aarch64: "arm64"
+  armv7l: "arm"
+  x86_64: "amd64"
+  i386: "386"
+vault_arch: "{{ vault_arch_map[ansible_machine] }}"
+vault_install_path: /usr/local/vault
+vault_datacenter: dc1

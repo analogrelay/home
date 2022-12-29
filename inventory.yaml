@@ -4,6 +4,11 @@ all:
     ansible_user: abby
   hosts:
   children:
+    consoles:
+      hosts:
+        deck.home.analogrelay.net:
+          ansible_host: 192.168.2.100
+          ansible_user: deck
     infrastructure:
       children:
         openwrt:
@@ -11,27 +16,39 @@ all:
             gaia.home.analogrelay.net:
               ansible_host: 192.168.1.1
               ansible_user: root
+            wutai.home.analogrelay.net:
+              ansible_host: 192.168.1.2
+              ansible_user: root
+        orbi:
+          hosts:
+            kalm.home.analogrelay.net:
+              ansible_host: 192.168.1.4
+              orbi_type: extender
+            midgar.home.analogrelay.net:
+              ansible_host: 192.168.1.3
+              orbi_type: router
     servers:
       children:
         cluster:
           children:
-            consul_servers:
+            consuls:
               hosts:
                 jessie.home.analogrelay.net:
                 tifa.home.analogrelay.net:
-            nomad_servers:
+            vaults:
+              hosts:
+                jessie.home.analogrelay.net:
+            nomads:
               hosts:
                 jessie.home.analogrelay.net:
                   ansible_host: 192.168.2.1
-            nomad_agents:
+            workers:
               hosts:
                 tifa.home.analogrelay.net:
                   ansible_host: 192.168.2.2
-        turks:
-          hosts:
-            rude.home.analogrelay.net:
-              ansible_host: 192.168.2.5
-            reno.home.analogrelay.net:
-              ansible_host: 192.168.2.6
-            tseng.home.analogrelay.net:
-              ansible_host: 192.168.2.7
+                rude.home.analogrelay.net:
+                  ansible_host: 192.168.2.5
+                reno.home.analogrelay.net:
+                  ansible_host: 192.168.2.6
+                tseng.home.analogrelay.net:
+                  ansible_host: 192.168.2.7

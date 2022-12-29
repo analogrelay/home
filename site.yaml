@@ -1,12 +1,43 @@
-#!/usr/bin/env ansible-playbook -i inventory.yaml
+#!/usr/bin/env ansible-playbook -i inventory.yaml --skip-tags=consul,nomad
+# By default, we skip some tags to avoid messing with the existing consul/nomad clusters
+# Whenever a new node is added that needs consul/nomad, we run 'script/refresh-cluster' to run those tags specifically
 ---
-- hosts: servers
+- name: Apply base role
+  hosts: servers
   roles:
-    - role: core
-- hosts: consul_servers
+    - role: base
+- name: Apply consul role
+  hosts: consuls
   roles:
     - role: consul
       consul_is_server: yes
-- hosts: servers:!consul_servers
+      consul_node_group: "consuls"
+  tags:
+    - consul
+- name: Apply consul-agent role
+  hosts: servers:!consuls
   roles:
     - role: consul
+      consul_node_group: "consuls"
+  tags:
+    - consul
+- name: Apply vault role
+  hosts: vaults
+  roles:
+    - role: vault
+      vault_datacenter: home0
+- name: Apply nomad role
+  hosts: nomads
+  roles:
+    - role: nomad
+      nomad_is_server: yes
+      nomad_node_group: "nomads"
+  tags:
+    - nomad
+- name: Apply nomad worker role
+  hosts: workers
+  roles:
+    - role: nomad
+      nomad_node_group: "nomads"
+  tags:
+    - nomad

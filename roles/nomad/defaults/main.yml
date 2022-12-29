@@ -1,0 +1,14 @@
+---
+nomad_version: "1.4.3"
+nomad_arch_map:
+  aarch64: "arm64"
+  armv7l: "arm"
+  x86_64: "amd64"
+  i386: "386"
+nomad_arch: "{{ nomad_arch_map[ansible_machine] }}"
+nomad_install_path: /usr/local/nomad
+nomad_dc: home0
+nomad_is_server: no
+nomad_leader_group: nomads
+nomad_bootstrap_expect: "{{ groups[nomad_leader_group] | length }}"
+nomad_retry_join: ' [{% for host in groups[nomad_leader_group] %}"{{ host }}"{% if not loop.last %}, {% endif %}{% endfor %}]'

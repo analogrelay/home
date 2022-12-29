@@ -1,0 +1,28 @@
+bind_addr = "0.0.0.0"
+data_dir = "/var/lib/nomad"
+region = "{{ nomad_dc }}"
+datacenter = "{{ nomad_dc }}"
+name = "{{ ansible_hostname }}.node"
+
+advertise {
+  # We need to specify our host's IP because we can't
+  # advertise 0.0.0.0 to other nodes in our cluster.
+  rpc = "{{ ansible_default_ipv4.address }}:4647"
+}
+
+client {
+  enabled = true
+  servers = {{ nomad_retry_join }}
+  host_volume "mosquitto" {
+    path = "/mnt/cluster/mosquitto"
+    read_only = false
+  }
+}
+
+telemetry {
+  collection_interval = "1s"
+  disable_hostname = true
+  prometheus_metrics = true
+  publish_allocation_metrics = true
+  publish_node_metrics = true
+}

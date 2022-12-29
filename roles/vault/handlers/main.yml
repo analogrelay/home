@@ -1,0 +1,11 @@
+---
+- name: Restart Vault
+  become: true
+  service:
+    name: vault
+    state: restarted
+- name: Reload Consul
+  become: true
+  service:
+    name: vault
+    state: reloaded

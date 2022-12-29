@@ -1,0 +1,12 @@
+[Unit]
+Description=Prometheus Node Exporter
+Documentation=https://prometheus.io
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/node_exporter
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

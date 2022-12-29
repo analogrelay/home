@@ -1,0 +1,65 @@
+- name: Check for Vault binaries exist
+  stat:
+    path: "{{ vault_install_path }}/{{ vault_version }}"
+  register: preexisting
+
+- name: Install Vault binaries
+  become: true
+  when: preexisting.stat.exists != true
+  block:
+    - name: Download Vault
+      get_url:
+        url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_{{ vault_arch }}.zip"
+        dest: /tmp/vault.zip
+        mode: 0777
+
+    - name: Prepare install path
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0755
+      with_items:
+        - "{{ vault_install_path }}/{{ vault_version }}"
+
+    - name: Unpack Vault
+      command: "unzip /tmp/vault.zip -d {{ vault_install_path }}/{{ vault_version }}/"
+
+    - name: Symlink versioned binary
+      file:
+        src: "{{ vault_install_path }}/{{ vault_version }}/vault"
+        dest: /usr/local/bin/vault
+        owner: root
+        group: root
+        state: link
+
+    - name: Clean up
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/vault.zip
+
+- name: Configure Vault
+  become: true
+  block:
+    - name: Install systemd service
+      copy:
+        src: vault.service
+        dest: "/etc/systemd/system/vault.service"
+        mode: 644
+      notify:
+        - Restart Vault
+
+    - name: Configure Vault
+      copy:
+        src: vault.hcl
+        dest: /etc/vault.hcl
+        mode: 600
+      notify: 
+        - Restart Vault
+
+    - name: Enable Vault
+      service:
+        name: vault
+        enabled: true
+        state: started

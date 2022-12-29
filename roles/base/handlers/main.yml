@@ -1,0 +1,6 @@
+---
+- name: Restart Node Exporter
+  become: true
+  service:
+    name: node_exporter
+    state: restarted

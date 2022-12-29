@@ -4,5 +4,15 @@ mkShell {
         ansible
         nodejs
         pulumi-bin
+        vault
+        nomad
+        consul
+        consul-template
     ];
+    shellHook = ''
+        export HOME_NIX_SHELL=1
+        export NOMAD_ADDR=http://jessie.home.analogrelay.net:4646
+        export CONSUL_HTTP_ADDR=http://jessie.home.analogrelay.net:8500
+        export VAULT_ADDR=http://jessie.home.analogrelay.net:8200
+    '';
 }

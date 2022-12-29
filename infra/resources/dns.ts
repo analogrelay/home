@@ -17,10 +17,12 @@ function processInventoryGroup(root: any) {
             if (hostName.endsWith(".home.analogrelay.net")) {
                 const shortName = hostName.split(".")[0];
                 const hostObj = root.hosts[hostName];
-                let ips = inventoryHosts[shortName] || [];
-                inventoryHosts[shortName] = ips;
-                if (hostObj.ansible_host) {
-                    ips.push(hostObj.ansible_host);
+                if (hostObj) {
+                    let ips = inventoryHosts[shortName] || [];
+                    inventoryHosts[shortName] = ips;
+                    if (hostObj.ansible_host) {
+                        ips.push(hostObj.ansible_host);
+                    }
                 }
             }
         }
@@ -48,6 +50,10 @@ const aRecords: {name: string, ips: pulumi.Input<pulumi.Input<string>[]> }[] = [
     { name: "k8s.local", ips: ["192.168.1.3"] },
     { name: "traefik.local", ips: ["192.168.2.91"] },
 ];
+
+// Manually "cname" the 'home.analogrelay.net' domain to the central load balancer
+const loadBalancerHost = "jessie";
+aRecords.push({ name: "home", ips: inventoryHosts[loadBalancerHost] });
 
 const cnameRecords: {name: string, value: pulumi.Input<string> }[] = [
     { name: "web.local", value: "traefik.local.analogrelay.net." },

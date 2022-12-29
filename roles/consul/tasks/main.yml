@@ -2,8 +2,6 @@
   stat:
     path: "{{ consul_install_path }}/{{ consul_version }}/"
   register: preexisting
-  tags:
-    - consul
 
 - name: Install Consul binaries
   become: true
@@ -14,8 +12,7 @@
         url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_{{ consul_arch }}.zip"
         dest: /tmp/consul.zip
         mode: 0777
-      tags:
-        - consul
+
     - name: Prepare install path
       file:
         path: "{{ item }}"
@@ -24,12 +21,10 @@
       with_items:
         - "{{ consul_install_path }}/{{ consul_version }}"
         - /etc/consul
-      tags:
-        - consul
+
     - name: Unpack Consul
       command: "unzip /tmp/consul.zip -d {{ consul_install_path }}/{{ consul_version }}/"
-      tags:
-        - consul
+
     - name: Symlink versioned binary
       file:
         src: "{{ consul_install_path }}/{{ consul_version }}/consul"
@@ -37,16 +32,13 @@
         owner: root
         group: root
         state: link
-      tags:
-        - consul
+
     - name: Clean up
       file:
         path: "{{ item }}"
         state: absent
       with_items:
         - /tmp/consul.zip
-      tags:
-        - consul
 
 - name: Configure Consul
   become: true
@@ -61,8 +53,7 @@
           dest: /usr/local/bin
         - src: consul-destroy-install.sh
           dest: /usr/local/bin
-      tags:
-        - consul
+
     - name: Install systemd service
       copy:
         src: consul.service
@@ -70,8 +61,7 @@
         mode: 644
       notify:
         - Restart Consul
-      tags:
-        - consul
+
     - name: Configure Consul
       template:
         src: "{{ item.src }}"
@@ -80,15 +70,26 @@
       with_items:
         - src: consul.hcl.j2
           dest: /etc/consul/consul.hcl
-      tags:
-        - consul
+
     - name: Enable Consul
       service:
         name: consul
         enabled: true
         state: started
-      tags:
-        - consul
+
+    - name: Prepare systemd-resolved path
+      file:
+        path: "/etc/systemd/resolved.conf.d"
+        state: directory
+        mode: 0755
+
+    - name: Set up systemd-resolved
+      copy:
+        src: resolved.conf.d/consul.conf
+        dest: "/etc/systemd/resolved.conf.d/consul.conf"
+        mode: 644
+      notify:
+        - Restart Systemd-resolved
 
 - pause:
     seconds: 3
@@ -96,11 +97,7 @@
 - name: Join Consul cluster
   command: "/usr/local/bin/consul join {{ groups[consul_node_group] | random }}"
   run_once: true
-  tags:
-    - consul
 
 - name: Wait for leader
   command: /usr/local/bin/consul-wait-for-leader.sh
   register: leader_status
-  tags:
-    - consul

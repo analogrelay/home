@@ -1,5 +1,0 @@
-- name: Install Core Utilities
-  become: true
-  apt:
-    pkg:
-      - unzip

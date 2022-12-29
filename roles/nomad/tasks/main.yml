@@ -1,0 +1,75 @@
+- name: Check if Nomad binaries exist
+  stat:
+    path: "{{ nomad_install_path }}/{{ nomad_version }}/"
+  register: preexisting
+
+- name: Install Nomad binaries
+  become: true
+  when: preexisting.stat.exists != true
+  block:
+    - name: Download Nomad
+      get_url:
+        url: "https://releases.hashicorp.com/nomad/{{ nomad_version }}/nomad_{{ nomad_version }}_linux_{{ nomad_arch }}.zip"
+        dest: /tmp/nomad.zip
+        mode: 0777
+
+    - name: Prepare install path
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0755
+      with_items:
+        - "{{ nomad_install_path }}/{{ nomad_version }}"
+        - /var/lib/nomad
+        - /etc/nomad
+
+    - name: Unpack Nomad
+      command: "unzip /tmp/nomad.zip -d {{ nomad_install_path }}/{{ nomad_version }}/"
+
+    - name: Symlink versioned binary
+      file:
+        src: "{{ nomad_install_path }}/{{ nomad_version }}/nomad"
+        dest: /usr/local/bin/nomad
+        owner: root
+        group: root
+        state: link
+
+    - name: Clean up
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/nomad.zip
+
+- name: Configure Nomad
+  become: true
+  block:
+    - name: Apply server config
+      when: nomad_is_server
+      template:
+        src: server.hcl.j2
+        dest: /etc/nomad/nomad.hcl
+      notify:
+        - Restart Nomad
+
+    - name: Apply client config
+      when: not nomad_is_server
+      template:
+        src: client.hcl.j2
+        dest: /etc/nomad/nomad.hcl
+      notify:
+        - Restart Nomad
+    
+    - name: Install systemd service
+      copy:
+        src: nomad.service
+        dest: "/etc/systemd/system/nomad.service"
+        mode: 644
+      notify:
+        - Restart Nomad
+
+    - name: Enable Nomad
+      service:
+        name: nomad
+        enabled: true
+        state: started
