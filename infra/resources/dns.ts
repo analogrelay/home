@@ -51,8 +51,8 @@ const aRecords: {name: string, ips: pulumi.Input<pulumi.Input<string>[]> }[] = [
     { name: "traefik.local", ips: ["192.168.2.91"] },
 ];
 
-// Manually "cname" the 'home.analogrelay.net' domain to the central load balancer
-const loadBalancerHost = "jessie";
+// Manually "cname" the 'home.analogrelay.net' domain to the front-door node, tifa.
+const loadBalancerHost = "tifa";
 aRecords.push({ name: "home", ips: inventoryHosts[loadBalancerHost] });
 
 const cnameRecords: {name: string, value: pulumi.Input<string> }[] = [

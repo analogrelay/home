@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
-
-for dir in $(find "$root/images" -type d -mindepth 1 -maxdepth 1); do
-    name=$(basename "$dir")
-    tag="ghcr.io/anurse/home/$name"
-    echo "Building $tag ..."
-    docker buildx build --platform linux/amd64,linux/arm64 -t $tag --push $dir
-done
