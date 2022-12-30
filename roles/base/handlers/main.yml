@@ -4,3 +4,18 @@
   service:
     name: node_exporter
     state: restarted
+- name: Restart Networkd
+  become: true
+  service:
+    name: systemd-networkd
+    state: restarted
+- name: Restart dnsmasq
+  become: true
+  service:
+    name: dnsmasq
+    state: restarted
+- name: Restart Avahi
+  become: true
+  service:
+    name: avahi-daemon
+    state: restarted

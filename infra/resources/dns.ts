@@ -56,8 +56,12 @@ const loadBalancerHost = "tifa";
 aRecords.push({ name: "home", ips: inventoryHosts[loadBalancerHost] });
 
 const cnameRecords: {name: string, value: pulumi.Input<string> }[] = [
-    { name: "web.local", value: "traefik.local.analogrelay.net." },
-    { name: "grafana.local", value: "traefik.local.analogrelay.net." },
+    { name: "traefik.home", value: "home.analogrelay.net." },
+    { name: "consul.home", value: "home.analogrelay.net." },
+    { name: "nomad.home", value: "home.analogrelay.net." },
+    { name: "vault.home", value: "home.analogrelay.net." },
+    { name: "prometheus.home", value: "home.analogrelay.net." },
+
     { name: "home.local", value: "traefik.local.analogrelay.net." },
     { name: "plex.local", value: "traefik.local.analogrelay.net." },
 ];

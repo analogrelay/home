@@ -4,6 +4,18 @@ all:
     ansible_user: abby
   hosts:
   children:
+    workstations:
+      children:
+        windows:
+          cloud.home.analogrelay.net:
+            ansible_host: 192.168.1.10
+        macos:
+          aerith.home.analogrelay.net:
+            ansible_host: 192.168.1.11
+            ansible_user: danielle
+          sephiroth.home.analogrelay.net:
+            ansible_host: 192.168.1.11
+            ansible_user: anurse
     consoles:
       hosts:
         deck.home.analogrelay.net:
@@ -35,6 +47,8 @@ all:
               hosts:
                 jessie.home.analogrelay.net:
                 tifa.home.analogrelay.net:
+                # barret.home.analogrelay.net:
+                wedge.home.analogrelay.net:
             vaults:
               hosts:
                 jessie.home.analogrelay.net:
@@ -52,3 +66,7 @@ all:
                   ansible_host: 192.168.2.6
                 tseng.home.analogrelay.net:
                   ansible_host: 192.168.2.7
+                # barret.home.analogrelay.net:
+                #   ansible_host: 192.168.2.8
+                wedge.home.analogrelay.net:
+                  ansible_host: 192.168.2.9

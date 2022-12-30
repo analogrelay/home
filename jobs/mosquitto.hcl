@@ -17,6 +17,13 @@ job "mosquitto" {
         service {
             name = "mosquitto-mqtt"
             port = "mqtt"
+            tags = [
+                "traefik"
+                "traefik.enable=true",
+                "traefik.tcp.routers.mosquitto.rule=HostSNI(`*`)",
+                "traefik.tcp.routers.mosquitto.entrypoints=mqtt",
+                "traefik.tcp.routers.mosquitto.service=mosquitto-mqtt@consulcatalog",
+            ]
         }
 
         service {

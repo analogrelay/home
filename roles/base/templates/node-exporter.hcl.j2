@@ -1,0 +1,12 @@
+service {
+    id = "node-exporter-{{ ansible_hostname }}"
+    name = "node-exporter"
+    address = "{{ ansible_default_ipv4.address }}" 
+    port = 9100
+    check = {
+        name = "HTTP API"
+        method = "GET"
+        http = "http://{{ansible_default_ipv4.address}}:9100/metrics"
+        interval = "30s"
+    }
+}

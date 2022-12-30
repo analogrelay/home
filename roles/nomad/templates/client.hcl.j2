@@ -1,5 +1,6 @@
 bind_addr = "0.0.0.0"
 data_dir = "/var/lib/nomad"
+plugin_dir = "/usr/local/share/nomad-plugins"
 region = "{{ nomad_dc }}"
 datacenter = "{{ nomad_dc }}"
 name = "{{ ansible_hostname }}.node"
@@ -17,6 +18,24 @@ client {
     path = "/mnt/cluster/mosquitto"
     read_only = false
   }
+  host_volume "zwavejs2mqtt" {
+    path = "/mnt/cluster/zwavejs2mqtt"
+    read_only = false
+  }
+  host_volume "homeassistant" {
+    path = "/mnt/cluster/homeassistant"
+    read_only = false
+  }
+{% if ansible_hostname == "tseng" %}
+  host_volume "prometheus" {
+    path = "/var/lib/prometheus"
+    read_only = false
+  }
+{% endif %}
+  host_volume "grafana" {
+    path = "/mnt/cluster/grafana"
+    read_only = false
+  }
 }
 
 telemetry {
@@ -25,4 +44,20 @@ telemetry {
   prometheus_metrics = true
   publish_allocation_metrics = true
   publish_node_metrics = true
+}
+
+plugin "usb" {
+  config {
+    included_vendor_ids = [0x0bda, 0x051d, 0x0658]
+    fingerprint_period = "5s"
+  }
+}
+
+plugin "docker" {
+  config {
+    allow_privileged = true
+    volumes {
+      enabled = true
+    }
+  }
 }

@@ -8,4 +8,4 @@ if [ "$HOME_NIX_SHELL" != "1" ]; then
     exit 1
 fi
 
-ansible-playbook -i inventory.yaml --tags=consul --tags=nomad site.yaml
+ansible-playbook -i inventory.yaml site.yaml

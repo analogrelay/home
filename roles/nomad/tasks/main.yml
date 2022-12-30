@@ -41,6 +41,22 @@
       with_items:
         - /tmp/nomad.zip
 
+- name: Install Nomad Plugins
+  become: true
+  block:
+    - name: Create nomad-plugins directory
+      file:
+        path: /usr/local/share/nomad-plugins
+        state: directory
+        mode: 0755
+
+    - name: Download Nomad USB
+      when: ansible_machine != "armv7l"
+      get_url:
+        url: "https://gitlab.com/api/v4/projects/23395095/packages/generic/nomad-usb-device-plugin/{{ nomad_usb_version }}/nomad-usb-device-plugin-linux-{{ nomad_usb_arch }}-{{ nomad_usb_version }}"
+        dest: /usr/local/share/nomad-plugins/nomad-usb-{{ nomad_usb_version }}
+        mode: 0777
+
 - name: Configure Nomad
   become: true
   block:
