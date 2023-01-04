@@ -1,21 +1,23 @@
 # NOTE: This file is also used to generate DNS records, so make sure the "ansible_host" values point at the right IP address!
 all:
   vars:
-    ansible_user: abby
+    ansible_user: ashley
   hosts:
   children:
     workstations:
       children:
         windows:
-          cloud.home.analogrelay.net:
-            ansible_host: 192.168.1.10
+          hosts:
+            cloud.home.analogrelay.net:
+              ansible_host: 192.168.1.10
         macos:
-          aerith.home.analogrelay.net:
-            ansible_host: 192.168.1.11
-            ansible_user: danielle
-          sephiroth.home.analogrelay.net:
-            ansible_host: 192.168.1.11
-            ansible_user: anurse
+          hosts:
+            aerith.home.analogrelay.net:
+              ansible_host: 192.168.1.11
+              ansible_user: anurse
+            sephiroth.home.analogrelay.net:
+              ansible_host: 192.168.1.11
+              ansible_user: anurse
     consoles:
       hosts:
         deck.home.analogrelay.net:

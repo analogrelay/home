@@ -4,8 +4,8 @@ groups:
   - admin
 
 users:
-  - name: abby
-    geocs: Abigail Stanton-Nurse
+  - name: ashley
+    geocs: Ashley Stanton-Nurse
     groups: admin
     sudo: ALL=(ALL) NOPASSWD:ALL
     ssh_authorized_keys:

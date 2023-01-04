@@ -157,8 +157,8 @@
         create_home: true
         shell: /bin/zsh
       with_items:
-        - name: abby
-          comment: Abigail Stanton-Nurse
+        - name: ashley
+          comment: Ashley Stanton-Nurse
           groups: admin, docker
     
     - name: Configure SSH
@@ -166,5 +166,11 @@
         key: "{{ item.key }}"
         user: "{{ item.user }}"
       with_items:
-        - user: abby
+        - user: ashley
           key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBjy0nnqPOijeAW1jA4a3e++tiKU7fWaXOkayfMypKs3"
+    
+    - name: Configure nopasswd sudo
+      copy:
+        src: ashley.sudoer
+        dest: "/etc/sudoers.d/99-ashley"
+        mode: 644
