@@ -4,7 +4,7 @@ job "traefik" {
 
     constraint {
         attribute = "${node.unique.name}"
-        value = "tifa.node"
+        value = "tseng.node"
     }
 
     group "traefik" {
@@ -95,37 +95,49 @@ http:
                 - "https"
             rule: "Host(`traefik.home.analogrelay.net`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))"
             service: api@internal
+        {{ if gt (service "consul" | len ) 0 }}
         consul_dashboard:
             entrypoints:
                 - "http"
                 - "https"
             rule: "Host(`consul.home.analogrelay.net`)"
             service: consul
+        {{ end }}
+        {{ if gt (service "http.nomad" | len ) 0 }}
         nomad_dashboard:
             entrypoints:
                 - "http"
                 - "https"
             rule: "Host(`nomad.home.analogrelay.net`)"
             service: nomad
+        {{ end }}
+        {{ if gt (service "vault" | len ) 0 }}
         vault_dashboard:
             entrypoints:
                 - "http"
                 - "https"
             rule: "Host(`vault.home.analogrelay.net`)"
             service: vault
+        {{ end }}
     services:
+        {{ if gt (service "consul" | len ) 0 }}
         consul:
             loadBalancer:
                 servers:{{ range service "consul" }}
                     - url: "http://{{ .Address }}:8500"{{ end }}
+        {{ end }}
+        {{ if gt (service "vault" | len ) 0 }}
         vault:
             loadBalancer:
                 servers:{{ range service "vault" }}
                     - url: "http://{{ .Address }}:8200"{{ end }}
+        {{ end }}
+        {{ if gt (service "http.nomad" | len ) 0 }}
         nomad:
             loadBalancer:
                 servers:{{ range service "http.nomad" }}
                     - url: "http://{{ .Address }}:4646"{{ end }}
+        {{ end }}
     middlewares:
         traefikRedirect:
             redirectRegex:

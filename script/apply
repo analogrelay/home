@@ -1,0 +1,46 @@
+#!/bin/bash
+root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
+cd $root
+
+if [ "$HOME_NIX_SHELL" != "1" ]; then
+    echo "This script must be run from within a nix-shell."
+    echo "Run 'script/activate' to enter a nix-shell."
+    exit 1
+fi
+
+if [ ! -f "$HOME/.vault-token" ]; then
+    echo "You must be logged into vault to run this script."
+    echo "Run 'script/vault-login' to log into vault."
+    exit 1
+fi
+
+ansible_args=()
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    shift
+    case $key in
+        -t|--tags)
+            ansible_args+=("--tags" "$1")
+            shift
+            ;;
+        -s|--skip-tags)
+            ansible_args+=("--skip-tags" "$1")
+            shift
+            ;;
+        -c|--check)
+            ansible_args+=("--check")
+            ;;
+        *)
+            echo "Unknown option: $key"
+            exit 1
+            ;;
+    esac
+done
+
+# Install ansible-galaxy components
+ansible-galaxy install -r requirements.yaml
+
+# Set up vault access
+export VAULT_TOKEN=$(vault token create -policy="cluster-kv-read" -ttl="5m" -field=token)
+
+ansible-playbook -i inventory.yaml "${ansible_args[@]}" site.yaml

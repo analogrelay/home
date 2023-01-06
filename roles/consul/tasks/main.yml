@@ -70,6 +70,8 @@
       with_items:
         - src: consul.hcl.j2
           dest: /etc/consul/consul.hcl
+      notify:
+        - Restart Consul
 
     - name: Enable Consul
       service:

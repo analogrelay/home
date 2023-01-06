@@ -1,0 +1,40 @@
+- name: Install Tailscale
+  become: true
+  when: ansible_distribution_file_variety == "Debian"
+  block:
+    - name: Fetch keys
+      get_url:
+        url: "{{ item.url }}"
+        dest: "/usr/share/keyrings/{{ item.name }}.gpg"
+      with_items:
+        - url: "https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}/{{ ansible_distribution_release }}.noarmor.gpg"
+          name: tailscale-archive-keyring
+
+    - name: Add repos
+      get_url:
+        url: "{{ item.url }}"
+        dest: "/etc/apt/sources.list.d/{{ item.name }}.list"
+      with_items:
+        - url: "https://pkgs.tailscale.com/stable/{{ ansible_distribution | lower }}/{{ ansible_distribution_release }}.tailscale-keyring.list"
+          name: tailscale
+    
+    - name: Install tailscale
+      apt:
+        update_cache: true
+        pkg:
+          - tailscale
+
+- name: Configure Tailscale
+  become: true
+  block:
+    - name: Check if connected
+      command: tailscale status -self
+      register: tailscale_connected
+      ignore_errors: true
+      changed_when:
+        - tailscale_connected.rc != 0
+
+    - name: Connect node to Tailnet
+      become: true
+      when: tailscale_connected.rc != 0
+      command: tailscale up --auth-key "{{ lookup('community.hashi_vault.vault_kv2_get', tailscale_token_path, engine_mount_point='kv').secret.token }}"

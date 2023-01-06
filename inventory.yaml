@@ -2,8 +2,19 @@
 all:
   vars:
     ansible_user: ashley
+    node_datacenter: home0
   hosts:
   children:
+    tailnet:
+      # Nodes that are in the tailnet
+      hosts:
+        jessie.home.analogrelay.net:
+        # tifa.home.analogrelay.net:
+        # barret.home.analogrelay.net:
+        wedge.home.analogrelay.net:
+        rude.home.analogrelay.net:
+        reno.home.analogrelay.net:
+        tseng.home.analogrelay.net:
     workstations:
       children:
         windows:
@@ -25,6 +36,11 @@ all:
           ansible_user: deck
     infrastructure:
       children:
+        synology:
+          hosts:
+            cid.home.analogrelay.net:
+              ansible_host: 192.168.1.5
+              ansible_user: root
         openwrt:
           hosts:
             gaia.home.analogrelay.net:
@@ -48,7 +64,7 @@ all:
             consuls:
               hosts:
                 jessie.home.analogrelay.net:
-                tifa.home.analogrelay.net:
+                # tifa.home.analogrelay.net:
                 # barret.home.analogrelay.net:
                 wedge.home.analogrelay.net:
             vaults:
@@ -60,8 +76,8 @@ all:
                   ansible_host: 192.168.2.1
             workers:
               hosts:
-                tifa.home.analogrelay.net:
-                  ansible_host: 192.168.2.2
+                # tifa.home.analogrelay.net:
+                #   ansible_host: 192.168.2.2
                 rude.home.analogrelay.net:
                   ansible_host: 192.168.2.5
                 reno.home.analogrelay.net:

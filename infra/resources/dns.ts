@@ -6,10 +6,11 @@ import { resources, network } from "@pulumi/azure-native";
 // We read the Ansible Inventory to get hostname mappings
 import * as yaml from "js-yaml";
 
+const TAILNET_DOMAIN = "bicorn-bebop.ts.net";
 const inventoryPath = path.resolve(__dirname, "../../inventory.yaml");
 const inventory: any = yaml.load(fs.readFileSync(inventoryPath, 'utf-8'));
 
-const inventoryHosts: { [key: string]: string[] } = {};
+const inventoryHosts: { [key: string]: { ips: string[], tailnet: boolean } } = {};
 
 function processInventoryGroup(root: any) {
     if (typeof root.hosts === "object") {
@@ -18,10 +19,10 @@ function processInventoryGroup(root: any) {
                 const shortName = hostName.split(".")[0];
                 const hostObj = root.hosts[hostName];
                 if (hostObj) {
-                    let ips = inventoryHosts[shortName] || [];
-                    inventoryHosts[shortName] = ips;
+                    let hostCfg = inventoryHosts[shortName] || { ips: [], tailnet: false };
+                    inventoryHosts[shortName] = hostCfg;
                     if (hostObj.ansible_host) {
-                        ips.push(hostObj.ansible_host);
+                        hostCfg.ips.push(hostObj.ansible_host);
                     }
                 }
             }
@@ -35,6 +36,12 @@ function processInventoryGroup(root: any) {
     }
 }
 processInventoryGroup(inventory.all);
+
+for (const hostName in inventory.all.children.tailnet.hosts) {
+    if (inventoryHosts[hostName]) {
+        inventoryHosts[hostName].tailnet = true;
+    }
+}
 
 const dnsResourceGroup = new resources.ResourceGroup("analogcloud-dns", {
     resourceGroupName: "analogcloud-dns",
@@ -51,20 +58,21 @@ const aRecords: {name: string, ips: pulumi.Input<pulumi.Input<string>[]> }[] = [
     { name: "traefik.local", ips: ["192.168.2.91"] },
 ];
 
-// Manually "cname" the 'home.analogrelay.net' domain to the front-door node, tifa.
-const loadBalancerHost = "tifa";
-aRecords.push({ name: "home", ips: inventoryHosts[loadBalancerHost] });
-
 const cnameRecords: {name: string, value: pulumi.Input<string> }[] = [
     { name: "traefik.home", value: "home.analogrelay.net." },
     { name: "consul.home", value: "home.analogrelay.net." },
     { name: "nomad.home", value: "home.analogrelay.net." },
     { name: "vault.home", value: "home.analogrelay.net." },
-    { name: "prometheus.home", value: "home.analogrelay.net." },
+    { name: "influxdb.home", value: "home.analogrelay.net." },
 
     { name: "home.local", value: "traefik.local.analogrelay.net." },
     { name: "plex.local", value: "traefik.local.analogrelay.net." },
 ];
+
+// Manually "cname" the 'home.analogrelay.net' domain to the front-door node, tifa.
+const loadBalancerHost = "tseng";
+aRecords.push({ name: "home", ips: inventoryHosts[loadBalancerHost].ips });
+cnameRecords.push({ name: "home.ts", value: `${loadBalancerHost}.ts.analogrelay.net.` });
 
 const analogrelayZone = new network.Zone("zone-analogrelay.net", {
     zoneName: "analogrelay.net",
@@ -122,9 +130,22 @@ Object.keys(inventoryHosts).forEach(n => {
         relativeRecordSetName: `${n}.home`,
         ttl: 3600,
         recordType: "A",
-        aRecords: pulumi.output(inventoryHosts[n]).apply(ips => ips.map(ip => {
+        aRecords: pulumi.output(inventoryHosts[n].ips).apply(ips => ips.map(ip => {
             return { ipv4Address: ip };
         })),
+    });
+});
+
+Object.keys(inventoryHosts).filter(k => inventoryHosts[k].tailnet).forEach(n => {
+    new network.RecordSet(`rs-analogrelay.net-cname-ts-${n}`, {
+        resourceGroupName: dnsResourceGroup.name,
+        zoneName: analogrelayZone.name,
+        relativeRecordSetName: `${n}.ts`,
+        ttl: 3600,
+        recordType: "CNAME",
+        cnameRecord: {
+            cname: `${n}.${TAILNET_DOMAIN}.`,
+        }
     });
 });
 

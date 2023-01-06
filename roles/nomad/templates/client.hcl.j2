@@ -14,28 +14,15 @@ advertise {
 client {
   enabled = true
   servers = {{ nomad_retry_join }}
-  host_volume "mosquitto" {
-    path = "/mnt/cluster/mosquitto"
+  
+  {% for name in nomad_volumes %}
+    {% if "host" not in nomad_volumes[name] or ansible_hostname == nomad_volumes[name].host %}
+  host_volume {{ name }} {
+    path = "{{ nomad_volumes[name].path }}"
     read_only = false
   }
-  host_volume "zwavejs2mqtt" {
-    path = "/mnt/cluster/zwavejs2mqtt"
-    read_only = false
-  }
-  host_volume "homeassistant" {
-    path = "/mnt/cluster/homeassistant"
-    read_only = false
-  }
-{% if ansible_hostname == "tseng" %}
-  host_volume "prometheus" {
-    path = "/var/lib/prometheus"
-    read_only = false
-  }
-{% endif %}
-  host_volume "grafana" {
-    path = "/mnt/cluster/grafana"
-    read_only = false
-  }
+    {% endif %}
+  {% endfor %}
 }
 
 telemetry {

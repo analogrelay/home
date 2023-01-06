@@ -42,6 +42,7 @@
       - dnsmasq
       - zsh
       - avahi-utils
+      - nfs-common
 
 - name: Place avahi config
   become: true
@@ -129,12 +130,12 @@
         owner: root
         group: admin
 
-    - name: Mount SMB Share
+    - name: Mount NFS Share
       ansible.posix.mount:
-        src: "//cid.local.analogrelay.net/cluster"
+        src: "cid.home.analogrelay.net:/volume1/cluster"
         path: "/mnt/cluster"
-        fstype: cifs
-        opts: "credentials=/etc/smb-credentials.txt,gid=admin,file_mode=0775,dir_mode=0775,rw"
+        fstype: nfs
+        opts: "rw"
         state: mounted
 
 - name: Configure user/group

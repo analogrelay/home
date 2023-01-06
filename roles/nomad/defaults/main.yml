@@ -20,3 +20,16 @@ nomad_is_server: no
 nomad_leader_group: nomads
 nomad_bootstrap_expect: "{{ groups[nomad_leader_group] | length }}"
 nomad_retry_join: ' [{% for host in groups[nomad_leader_group] %}"{{ host }}"{% if not loop.last %}, {% endif %}{% endfor %}]'
+
+nomad_volumes:
+  mosquitto: 
+    path: "/mnt/cluster/mosquitto"
+  zwavejs2mqtt:
+    path: "/mnt/cluster/zwavejs2mqtt"
+  homeassistant: 
+    path: "/mnt/cluster/homeassistant"
+  influxdb: 
+    host: tseng
+    path: "/var/lib/volumes/influxdb"
+  grafana:
+    path: "/mnt/cluster/grafana"

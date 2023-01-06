@@ -1,4 +1,3 @@
-#!/usr/bin/env ansible-playbook -i inventory.yaml --skip-tags=consul,nomad,vault
 # By default, we skip some tags to avoid messing with the existing consul/nomad clusters
 # Whenever a new node is added that needs consul/nomad, we run 'script/refresh-cluster' to run those tags specifically
 ---
@@ -8,6 +7,30 @@
     - role: base
   tags:
     - bootstrap
+
+- name: Apply tailnet role
+  hosts: tailnet
+  roles:
+    - role: tailnet
+  tags:
+    - bootstrap
+    - tailnet
+
+- name: Configure storage volumes
+  hosts: servers
+  tasks:
+    - name: Create volumes
+      become: true
+      when: ansible_hostname == item.host
+      with_items:
+        - host: tseng
+          path: /var/lib/volumes/influxdb
+      file:
+        path: "{{ item.path }}"
+        state: directory
+  tags:
+    - storage
+
 - name: Apply consul role
   hosts: consuls
   roles:
@@ -16,6 +39,7 @@
       consul_node_group: "consuls"
   tags:
     - consul
+
 - name: Apply consul-agent role
   hosts: servers:!consuls
   roles:
@@ -23,6 +47,7 @@
       consul_node_group: "consuls"
   tags:
     - consul
+
 - name: Apply vault role
   hosts: vaults
   roles:
@@ -30,6 +55,7 @@
       vault_datacenter: home0
   tags:
     - vault
+
 - name: Apply nomad role
   hosts: nomads
   roles:
@@ -38,6 +64,7 @@
       nomad_node_group: "nomads"
   tags:
     - nomad
+
 - name: Apply nomad worker role
   hosts: workers
   roles:

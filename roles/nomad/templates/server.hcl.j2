@@ -18,6 +18,9 @@ server {
   bootstrap_expect = {{ nomad_bootstrap_expect }}
   retry_join = {{ nomad_retry_join }}
   rejoin_after_leave = true
+  default_scheduler_config {
+    scheduler_algorithm = "spread"
+  }
 }
 
 telemetry {

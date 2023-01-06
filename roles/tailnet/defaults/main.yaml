@@ -1,0 +1,1 @@
+tailscale_token_path: cluster/{{ node_datacenter }}/{{ ansible_hostname }}/tailscale
