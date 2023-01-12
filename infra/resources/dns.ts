@@ -38,8 +38,11 @@ function processInventoryGroup(root: any) {
 processInventoryGroup(inventory.all);
 
 for (const hostName in inventory.all.children.tailnet.hosts) {
-    if (inventoryHosts[hostName]) {
-        inventoryHosts[hostName].tailnet = true;
+    if (hostName.endsWith(".home.analogrelay.net")) {
+        const shortName = hostName.split(".")[0];
+        if (inventoryHosts[shortName]) {
+            inventoryHosts[shortName].tailnet = true;
+        }
     }
 }
 
@@ -58,21 +61,23 @@ const aRecords: {name: string, ips: pulumi.Input<pulumi.Input<string>[]> }[] = [
     { name: "traefik.local", ips: ["192.168.2.91"] },
 ];
 
-const cnameRecords: {name: string, value: pulumi.Input<string> }[] = [
-    { name: "traefik.home", value: "home.analogrelay.net." },
-    { name: "consul.home", value: "home.analogrelay.net." },
-    { name: "nomad.home", value: "home.analogrelay.net." },
-    { name: "vault.home", value: "home.analogrelay.net." },
-    { name: "influxdb.home", value: "home.analogrelay.net." },
+const cnameRecords: {name: string, value: pulumi.Input<string> }[] = [];
+const serviceHosts = ["traefik", "consul", "nomad", "vault", "influxdb", "grafana", "prometheus"];
+serviceHosts.forEach(host => {
+    cnameRecords.push({ name: `${host}.home`, value: `home.analogrelay.net.` });
+    cnameRecords.push({ name: `${host}.ts`, value: `home.ts.analogrelay.net.` });
+});
 
-    { name: "home.local", value: "traefik.local.analogrelay.net." },
-    { name: "plex.local", value: "traefik.local.analogrelay.net." },
-];
+// Manually "cname" the 'home.analogrelay.net' domain to the front-door node(s).
+const loadBalancerHosts = [ "tseng" ];
+const loadBalancerIps: string[] = [];
+loadBalancerHosts.forEach(host => inventoryHosts[host].ips.forEach(ip => loadBalancerIps.push(ip)));
+aRecords.push({ name: "home", ips: loadBalancerIps });
 
-// Manually "cname" the 'home.analogrelay.net' domain to the front-door node, tifa.
-const loadBalancerHost = "tseng";
-aRecords.push({ name: "home", ips: inventoryHosts[loadBalancerHost].ips });
-cnameRecords.push({ name: "home.ts", value: `${loadBalancerHost}.ts.analogrelay.net.` });
+// Manually "cname" the 'home.ts.analogrelay.net' domain to the front-door node(s) tailnet address.
+// TODO: Fetch this somehow?
+const loadBalancerTsIps = [ "100.120.250.86" ];
+aRecords.push({ name: "home.ts", ips: loadBalancerTsIps });
 
 const analogrelayZone = new network.Zone("zone-analogrelay.net", {
     zoneName: "analogrelay.net",
@@ -133,19 +138,6 @@ Object.keys(inventoryHosts).forEach(n => {
         aRecords: pulumi.output(inventoryHosts[n].ips).apply(ips => ips.map(ip => {
             return { ipv4Address: ip };
         })),
-    });
-});
-
-Object.keys(inventoryHosts).filter(k => inventoryHosts[k].tailnet).forEach(n => {
-    new network.RecordSet(`rs-analogrelay.net-cname-ts-${n}`, {
-        resourceGroupName: dnsResourceGroup.name,
-        zoneName: analogrelayZone.name,
-        relativeRecordSetName: `${n}.ts`,
-        ttl: 3600,
-        recordType: "CNAME",
-        cnameRecord: {
-            cname: `${n}.${TAILNET_DOMAIN}.`,
-        }
     });
 });
 

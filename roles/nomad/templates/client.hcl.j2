@@ -23,6 +23,14 @@ client {
   }
     {% endif %}
   {% endfor %}
+
+  host_network "local" {
+    cidr = "192.168.0.0/16"
+  }
+
+  host_network "tailnet" {
+    cidr = "100.64.0.0/10"
+  }
 }
 
 telemetry {
@@ -31,6 +39,11 @@ telemetry {
   prometheus_metrics = true
   publish_allocation_metrics = true
   publish_node_metrics = true
+}
+
+vault {
+  enabled = true
+  address = "http://jessie.home.analogrelay.net:8200"
 }
 
 plugin "usb" {

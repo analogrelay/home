@@ -1,0 +1,69 @@
+#!/bin/bash
+set -euo pipefail
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+root_dir="$( cd "$script_dir/.." &> /dev/null && pwd )"
+cd $root_dir
+
+if [ "$HOME_NIX_SHELL" != "1" ]; then
+    echo "This script must be run from within a nix-shell."
+    echo "Run 'script/activate' to enter a nix-shell."
+    exit 1
+fi
+
+node_name=
+mount_point="pki_int"
+role="node-identity"
+copy=false
+while [[ $# -gt 0 ]]; do
+    key="$1"
+    shift
+    case $key in
+        -d|--datacenter)
+            datacenter="$1"
+            shift
+            ;;
+        -o|--output)
+            output_file="$1"
+            shift
+            ;;
+        -m|--mount)
+            mount_point="$1"
+            shift
+            ;;
+        -r|--role)
+            role="$1"
+            shift
+            ;;
+        -c|--copy)
+            copy=true
+            ;;
+        *)
+            if [ -z "$node_name" ]; then
+                node_name="$key"
+            else
+                echo "Unknown option: $key"
+                exit 1
+            fi
+            ;;
+    esac
+done
+
+if [ -z "${output_file:-}" ]; then
+    output_file="pki/nodes/$node_name.node.pem"
+fi
+
+if [ ! -d "$(dirname $output_file)" ]; then
+    mkdir -p "$(dirname $output_file)"
+fi
+
+echo "Generating node identity certificate for $node_name ..."
+if ! vault write -format=json $mount_point/issue/$role common_name=$node_name format=pem_bundle | jq -r ".data.certificate" > $output_file; then
+    echo "Failed to generate node identity certificate" 1>&2
+    exit 1
+fi
+
+if [ "$copy" = true ]; then
+    echo "Copying node identity certificate to $node_name ..."
+    ansible $node_name -i inventory.yaml -m file -a "path=/etc/pki state=directory" -b
+    ansible $node_name -i inventory.yaml -m copy -a "src=$output_file dest=/etc/pki/node.pem mode=0660" -b
+fi

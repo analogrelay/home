@@ -9,6 +9,7 @@ mkShell {
         consul
         consul-template
         python310Packages.hvac
+        jq
     ];
     shellHook = ''
         export HOME_NIX_SHELL=1

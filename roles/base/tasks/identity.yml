@@ -1,0 +1,39 @@
+- name: Check for node identity certificate
+  become: true
+  block:
+    - name: Check if node identity certificate exists
+      stat:
+        path: '/etc/pki/node.pem'
+      register: node_identity_cert_stat
+
+    - name: Fail if identity certificate missing
+      when: not node_identity_cert_stat.stat.exists
+      fail:
+        msg: Node identity certificate is not installed
+
+- name: Install internal PKI roots
+  become: true
+  block:
+    - name: Copy roots
+      copy:
+        src: "../../pki/{{ item }}"
+        dest: "/etc/pki/{{ item }}"
+        mode: 0664
+      with_items:
+        - analoglab_int_2022.crt
+        - analoglab_root_2022.crt
+
+    - name: Install roots
+      copy:
+        src: "/etc/pki/{{ item }}"
+        dest: "/usr/local/share/ca-certificates"
+        remote_src: true
+        mode: 0664
+      with_items:
+        - analoglab_int_2022.crt
+        - analoglab_root_2022.crt
+      notify:
+        - Update CA certs
+
+    - name: Flush handlers
+      meta: flush_handlers

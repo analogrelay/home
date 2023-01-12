@@ -8,6 +8,7 @@ job "upsd" {
         network {
             port "upsd" {
                 to = "3493"
+                host_network = "local"
             }
         }
 

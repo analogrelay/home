@@ -8,9 +8,11 @@ job "mosquitto" {
         network {
             port "mqtt" {
                 to = "1883"
+                host_network = "local"
             }
             port "mqtt_ws" {
                 to = "9001"
+                host_network = "local"
             }
         }
 
@@ -18,7 +20,7 @@ job "mosquitto" {
             name = "mosquitto-mqtt"
             port = "mqtt"
             tags = [
-                "traefik"
+                "traefik",
                 "traefik.enable=true",
                 "traefik.tcp.routers.mosquitto.rule=HostSNI(`*`)",
                 "traefik.tcp.routers.mosquitto.entrypoints=mqtt",
@@ -65,6 +67,9 @@ EOH
                 volumes = [
                     "local/mosquitto.conf:/mosquitto/config/mosquitto.conf"
                 ]
+            }
+            resources {
+                memory = 50
             }
         }
     }

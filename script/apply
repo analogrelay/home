@@ -41,6 +41,6 @@ done
 ansible-galaxy install -r requirements.yaml
 
 # Set up vault access
-export VAULT_TOKEN=$(vault token create -policy="cluster-kv-read" -ttl="5m" -field=token)
+export VAULT_TOKEN=$(vault token create -policy="cluster-kv-read" -policy="services-kv-read" -ttl="5m" -field=token)
 
 ansible-playbook -i inventory.yaml "${ansible_args[@]}" site.yaml

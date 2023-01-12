@@ -8,6 +8,9 @@ Wants=network-online.target
 ExecStart=/usr/local/bin/nomad agent --config=/etc/nomad/nomad.hcl
 ExecReload=/bin/kill -HUP $MAINPID
 KillSignal=SIGINT
+{% if nomad_vault_token != "" %}
+Environment=VAULT_TOKEN={{ nomad_vault_token }}
+{% endif %}
 
 [Install]
 WantedBy=multi-user.target

@@ -16,27 +16,13 @@
     - bootstrap
     - tailnet
 
-- name: Configure storage volumes
-  hosts: servers
-  tasks:
-    - name: Create volumes
-      become: true
-      when: ansible_hostname == item.host
-      with_items:
-        - host: tseng
-          path: /var/lib/volumes/influxdb
-      file:
-        path: "{{ item.path }}"
-        state: directory
-  tags:
-    - storage
-
 - name: Apply consul role
   hosts: consuls
   roles:
     - role: consul
       consul_is_server: yes
       consul_node_group: "consuls"
+      consul_dc: "{{ node_datacenter }}"
   tags:
     - consul
 
@@ -45,6 +31,7 @@
   roles:
     - role: consul
       consul_node_group: "consuls"
+      consul_dc: "{{ node_datacenter }}"
   tags:
     - consul
 
@@ -62,6 +49,7 @@
     - role: nomad
       nomad_is_server: yes
       nomad_node_group: "nomads"
+      nomad_dc: "{{ node_datacenter }}"
   tags:
     - nomad
 
@@ -70,5 +58,14 @@
   roles:
     - role: nomad
       nomad_node_group: "nomads"
+      nomad_dc: "{{ node_datacenter }}"
   tags:
     - nomad
+
+- name: Apply synology roles
+  hosts: synology
+  roles:
+    - role: base
+    - role: consul
+  tags:
+    - synology

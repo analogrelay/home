@@ -14,14 +14,27 @@ job "traefik" {
             port "http" {
                 static = "80"
                 to = "80"
+                host_network = "local"
             }
             port "https" {
                 static = "443"
                 to = "443"
+                host_network = "local"
+            }
+            port "tailnet-http" {
+                static = "80"
+                to = "80"
+                host_network = "tailnet"
+            }
+            port "tailnet-https" {
+                static = "443"
+                to = "443"
+                host_network = "tailnet"
             }
             port "mqtt" {
                 static = "1883"
                 to = "1883"
+                host_network = "local"
             }
         }
 
@@ -44,12 +57,16 @@ job "traefik" {
             driver = "docker"
             config {
                 image = "traefik:v2.9"
-                ports = [ "http", "https", "mqtt" ]
+                ports = [ "http", "https", "mqtt", "tailnet-http", "tailnet-https" ]
 
                 volumes = [
                     "local/traefik.yaml:/etc/traefik/traefik.yaml",
                     "local/conf.d:/etc/traefik/conf.d"
                 ]
+            }
+
+            resources {
+                memory = 100
             }
 
             template {
@@ -85,7 +102,7 @@ http:
             entrypoints:
                 - "http"
                 - "https"
-            rule: "Host(`traefik.home.analogrelay.net`)"
+            rule: "(Host(`traefik.home.analogrelay.net`) || Host(`traefik.ts.analogrelay.net`))"
             service: api@internal
             middlewares:
                 - "traefikRedirect"
@@ -93,14 +110,14 @@ http:
             entrypoints:
                 - "http"
                 - "https"
-            rule: "Host(`traefik.home.analogrelay.net`) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))"
+            rule: "(Host(`traefik.home.analogrelay.net`) || Host(`traefik.ts.analogrelay.net`)) && (PathPrefix(`/dashboard`) || PathPrefix(`/api`))"
             service: api@internal
         {{ if gt (service "consul" | len ) 0 }}
         consul_dashboard:
             entrypoints:
                 - "http"
                 - "https"
-            rule: "Host(`consul.home.analogrelay.net`)"
+            rule: "Host(`consul.home.analogrelay.net`) || Host(`consul.ts.analogrelay.net`)"
             service: consul
         {{ end }}
         {{ if gt (service "http.nomad" | len ) 0 }}
@@ -108,7 +125,7 @@ http:
             entrypoints:
                 - "http"
                 - "https"
-            rule: "Host(`nomad.home.analogrelay.net`)"
+            rule: "Host(`nomad.home.analogrelay.net`) || Host(`nomad.ts.analogrelay.net`)"
             service: nomad
         {{ end }}
         {{ if gt (service "vault" | len ) 0 }}
@@ -116,7 +133,7 @@ http:
             entrypoints:
                 - "http"
                 - "https"
-            rule: "Host(`vault.home.analogrelay.net`)"
+            rule: "Host(`vault.home.analogrelay.net`) || Host(`vault.ts.analogrelay.net`)"
             service: vault
         {{ end }}
     services:

@@ -5,6 +5,7 @@ job "grafana" {
         network {
             port "http" {
                 to = "3000"
+                host_network = "local"
             }
         }
         service {
@@ -13,8 +14,13 @@ job "grafana" {
             tags = [
                 "traefik",
                 "traefik.enable=true",
-                "traefik.http.routers.grafana.rule=Host(`home.analogrelay.net`) && PathPrefix(`/grafana`)",
+                "traefik.http.routers.grafana.rule=Host(`grafana.ts.analogrelay.net`)",
                 "traefik.http.routers.grafana.entrypoints=http",
+                "traefik.http.routers.grafana-redirect.rule=Host(`grafana.home.analogrelay.net`)",
+                "traefik.http.routers.grafana-redirect.entrypoints=http",
+                "traefik.http.routers.grafana-redirect.middlewares=grafanaRedirect",
+                "traefik.http.middlewares.grafanaRedirect.redirectRegex.regex=^https?://grafana.home.analogrelay.net(/(.+))?$",
+                "traefik.http.middlewares.grafanaRedirect.redirectRegex.replacement=http://grafana.ts.analogrelay.net/$${2}",
             ]
         }
 
@@ -34,6 +40,10 @@ job "grafana" {
                 ]
             }
 
+            resources {
+                memory = 150
+            }
+
             volume_mount {
                 volume = "grafana-data"
                 destination = "/var/lib/grafana"
@@ -43,9 +53,8 @@ job "grafana" {
             template {
                 data = <<EOH
 [server]
-domain = home.analogrelay.net
-root_url = $(protocol)s://%(domain)s:%(http_port)s/grafana/
-serve_from_sub_path = true
+domain = grafana.ts.analogrelay.net
+root_url = %(protocol)s://%(domain)s:%(http_port)s/
 EOH
                 destination = "local/grafana.ini"
             }

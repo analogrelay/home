@@ -9,9 +9,9 @@ all:
       # Nodes that are in the tailnet
       hosts:
         jessie.home.analogrelay.net:
-        # tifa.home.analogrelay.net:
-        # barret.home.analogrelay.net:
-        wedge.home.analogrelay.net:
+        tifa.home.analogrelay.net:
+        barret.home.analogrelay.net:
+        # wedge.home.analogrelay.net:
         rude.home.analogrelay.net:
         reno.home.analogrelay.net:
         tseng.home.analogrelay.net:
@@ -37,10 +37,12 @@ all:
     infrastructure:
       children:
         synology:
+          vars:
+            is_synology: true
           hosts:
             cid.home.analogrelay.net:
               ansible_host: 192.168.1.5
-              ansible_user: root
+              ansible_user: anurse
         openwrt:
           hosts:
             gaia.home.analogrelay.net:
@@ -58,15 +60,19 @@ all:
               ansible_host: 192.168.1.3
               orbi_type: router
     servers:
+      vars:
+        node_identified: true
+        node_monitored: true
+        node_storage: true
+        avahi_reflector: true
       children:
         cluster:
           children:
             consuls:
               hosts:
+                tseng.home.analogrelay.net:
                 jessie.home.analogrelay.net:
-                # tifa.home.analogrelay.net:
-                # barret.home.analogrelay.net:
-                wedge.home.analogrelay.net:
+                # wedge.home.analogrelay.net:
             vaults:
               hosts:
                 jessie.home.analogrelay.net:
@@ -76,15 +82,17 @@ all:
                   ansible_host: 192.168.2.1
             workers:
               hosts:
-                # tifa.home.analogrelay.net:
-                #   ansible_host: 192.168.2.2
+                tifa.home.analogrelay.net:
+                  ansible_host: 192.168.2.2
                 rude.home.analogrelay.net:
                   ansible_host: 192.168.2.5
                 reno.home.analogrelay.net:
                   ansible_host: 192.168.2.6
                 tseng.home.analogrelay.net:
                   ansible_host: 192.168.2.7
-                # barret.home.analogrelay.net:
-                #   ansible_host: 192.168.2.8
-                wedge.home.analogrelay.net:
-                  ansible_host: 192.168.2.9
+                barret.home.analogrelay.net:
+                  ansible_host: 192.168.2.8
+    offline:
+      hosts:
+        wedge.home.analogrelay.net:
+          ansible_host: 192.168.2.9

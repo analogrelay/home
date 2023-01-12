@@ -13,6 +13,7 @@ job "influxdb" {
         network {
             port "http" {
                 to = "8086"
+                host_network = "local"
             }
         }
 
@@ -22,7 +23,7 @@ job "influxdb" {
             tags = [
                 "traefik",
                 "traefik.enable=true",
-                "traefik.http.routers.influxdb.rule=Host(`influxdb.home.analogrelay.net`)",
+                "traefik.http.routers.influxdb.rule=Host(`influxdb.home.analogrelay.net`) || Host(`influxdb.ts.analogrelay.net`)",
                 "traefik.http.routers.influxdb.entrypoints=http",
             ]
         }

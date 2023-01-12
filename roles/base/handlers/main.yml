@@ -4,6 +4,11 @@
   service:
     name: node_exporter
     state: restarted
+- name: Reload telegraf
+  become: true
+  service:
+    name: telegraf
+    state: reloaded
 - name: Restart Networkd
   become: true
   service:
@@ -19,3 +24,6 @@
   service:
     name: avahi-daemon
     state: restarted
+- name: Update CA certs
+  become: true
+  command: update-ca-certificates

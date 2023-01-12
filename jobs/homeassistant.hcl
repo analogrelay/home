@@ -4,7 +4,8 @@ job "homeassistant" {
 
     constraint {
         attribute = "${attr.kernel.arch}"
-        value = "aarch64"
+        operator = "!="
+        value = "armv7l"
     }
 
     group "homeassistant" {
@@ -13,6 +14,7 @@ job "homeassistant" {
         network {
             port "http" {
                 to = "8123"
+                host_network = "local"
             }
         }
 
@@ -22,7 +24,7 @@ job "homeassistant" {
             tags = [
                 "traefik",
                 "traefik.enable=true",
-                "traefik.http.routers.homeassistant.rule=Host(`home.analogrelay.net`)",
+                "traefik.http.routers.homeassistant.rule=Host(`home.analogrelay.net`) || Host(`home.ts.analogrelay.net`)",
                 "traefik.http.routers.homeassistant.entrypoints=http",
             ]
         }
@@ -46,6 +48,10 @@ job "homeassistant" {
             config {
                 image = "homeassistant/home-assistant:2022.12"
                 ports = [ "http" ]
+            }
+            resources {
+                cpu = 100
+                memory = 600
             }
         }
     }

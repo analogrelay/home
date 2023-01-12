@@ -1,0 +1,49 @@
+- name: Configure Data Volumes
+  become: true
+  block:
+    - name: Ensure Mount Points
+      file:
+        path: /mnt/backups
+        state: directory
+      with_items:
+        - "/mnt/cluster"
+        - "/mnt/backups"
+
+    - name: Create volumes
+      when: ansible_hostname == item.host
+      with_items:
+        - host: tseng
+          path: /var/lib/volumes/influxdb
+        - host: tseng
+          path: /var/lib/volumes/prometheus
+        - host: tseng
+          path: /var/lib/volumes/grafana
+      file:
+        path: "{{ item.path }}"
+        state: directory
+        mode: 0777
+        owner: root
+        group: storage
+
+    - name: Place SMB Credentials
+      template:
+        src: smb-credentials.j2
+        dest: /etc/smb-credentials
+        mode: 0640
+        owner: root
+        group: admin
+
+    - name: Mount SMB Shares
+      ansible.posix.mount:
+        src: "{{ item.src }}"
+        path: "{{ item.path }}"
+        fstype: cifs
+        opts: "credentials={{ item.credential_file }},uid=root,gid=storage,file_mode=0775,dir_mode=0775,rw"
+        state: mounted
+      with_items:
+        - src: "//cid.home.analogrelay.net/cluster"
+          path: "/mnt/cluster"
+          credential_file: "/etc/smb-credentials"
+        - src: "//cid.home.analogrelay.net/backups"
+          path: "/mnt/backups"
+          credential_file: "/etc/smb-credentials"

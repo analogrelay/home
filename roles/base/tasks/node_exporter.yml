@@ -1,0 +1,64 @@
+- name: Check if Node Exporter binaries exist
+  stat:
+    path: "/usr/local/bin/node_exporter"
+  register: preexisting_node_exporter
+
+- name: Install Node Exporter
+  when: preexisting_node_exporter.stat.exists != true
+  block:
+    - name: Fetch Node Exporter
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}.tar.gz"
+        dest: /tmp/node_exporter.tar.gz
+        mode: 0777
+    
+    - name: Unpack Node Exporter
+      unarchive:
+        src: /tmp/node_exporter.tar.gz
+        dest: /tmp
+        creates: /tmp/node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}/node_exporter
+        remote_src: yes
+    
+    - name: Install Node Exporter
+      become: true
+      copy:
+        src: /tmp/node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}/node_exporter
+        dest: /usr/local/bin
+        mode: u=rwx,g=rx,o=rx
+        remote_src: yes
+
+    - name: Clean up
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/node_exporter.tar.gz
+        - /tmp/node_exporter-{{ node_exporter_version }}.linux-{{ node_exporter_arch }}
+
+- name: Install systemd service
+  become: true
+  copy:
+    src: node_exporter.service
+    dest: "/etc/systemd/system/node_exporter.service"
+    mode: 644
+  notify:
+    - Restart Node Exporter
+
+- name: Enable Node Exporter
+  become: true
+  service:
+    name: node_exporter
+    enabled: true
+    state: started
+
+- name: Place Node Exporter service directory
+  become: true
+  file:
+    path: "/etc/consul"
+    state: directory
+
+- name: Place Node Exporter service file
+  become: true
+  template:
+    src: node-exporter.hcl.j2
+    dest: /etc/consul/node-exporter.hcl

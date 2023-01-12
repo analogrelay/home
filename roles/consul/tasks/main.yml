@@ -23,7 +23,15 @@
         - /etc/consul
 
     - name: Unpack Consul
-      command: "unzip /tmp/consul.zip -d {{ consul_install_path }}/{{ consul_version }}/"
+      when: (is_synology is not defined) or (not is_synology)
+      unarchive:
+        src: /tmp/consul.zip
+        remote_src: true
+        dest: "{{ consul_install_path }}/{{ consul_version }}"
+
+    - name: Unpack Consul (Synology)
+      when: (is_synology is defined) and (is_synology)
+      command: "7z x /tmp/consul.zip -o{{ consul_install_path }}/{{ consul_version }}"
 
     - name: Symlink versioned binary
       file:

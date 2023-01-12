@@ -8,9 +8,11 @@ job "zwavejs2mqtt" {
         network {
             port "http" {
                 to = "8091"
+                host_network = "local"
             }
             port "ws" {
                 to = "3000"
+                host_network = "local"
             }
         }
 
@@ -20,7 +22,7 @@ job "zwavejs2mqtt" {
             tags = [
                 "traefik",
                 "traefik.enable=true",
-                "traefik.http.routers.zwavejs2mqtt.rule=Host(`home.analogrelay.net`) && PathPrefix(`/zwave`)",
+                "traefik.http.routers.zwavejs2mqtt.rule=(Host(`home.analogrelay.net`) || Host(`home.ts.analogrelay.net`)) && PathPrefix(`/zwave`)",
                 "traefik.http.routers.zwavejs2mqtt.entrypoints=http",
                 "traefik.http.routers.zwavejs2mqtt.middlewares=stripzwaveprefix,addzwaveheader",
                 "traefik.http.middlewares.stripzwaveprefix.stripprefix.prefixes=/zwave",
@@ -60,6 +62,10 @@ job "zwavejs2mqtt" {
                     target = "/dev/zwave"
                     readonly = false
                 }
+            }
+
+            resources {
+                memory = 200
             }
 
             volume_mount {

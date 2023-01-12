@@ -1,0 +1,25 @@
+- name: Configure Telegraf
+  become: true
+  block:
+    - name: Install influx token
+      lineinfile:
+        path: /etc/default/telegraf
+        state: present
+        regexp: "^INFLUX_TOKEN="
+        line: "INFLUX_TOKEN=\"{{ lookup('community.hashi_vault.vault_kv2_get', 'services/telegraf', engine_mount_point='kv').secret.influx_token }}\""
+      notify:
+        - Reload telegraf
+
+    - name: Install root config
+      template:
+        src: telegraf.conf.j2
+        dest: /etc/telegraf/telegraf.conf
+      notify:
+        - Reload telegraf
+    
+    - name: Install config files
+      copy:
+        src: telegraf.d/
+        dest: /etc/telegraf/telegraf.d
+      notify:
+        - Reload telegraf
