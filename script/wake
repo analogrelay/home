@@ -1,0 +1,31 @@
+#!/bin/bash
+#/ Usage: script/wake <node-name>
+#/ Attempts to wake a node using wakeonlan
+root="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
+cd $root
+
+if ! type "wakeonlan" > /dev/null; then
+    echo "wakeonlan is not installed. Please install it first."
+    exit 1
+fi
+
+node="$1"
+
+if [ -z "$node" ]; then
+    echo "Usage: script/wake <node-name>"
+    exit 1
+fi
+
+if [[ "$node" != *.home.analogrelay.net ]]; then
+    node="$node.home.analogrelay.net"
+fi
+
+# Attempt to resolve the node's MAC address
+mac=$(ansible-inventory --host "$node" | jq -r '.mac_address')
+if [ "$mac" == "null" ]; then
+    echo "Failed to find MAC address for $node."
+    exit 1
+fi
+
+echo "Waking $node, believed to be at $mac ..."
+wakeonlan "$mac"

@@ -32,6 +32,9 @@ nomad_volumes:
     path: "/mnt/cluster/zwavejs2mqtt"
   homeassistant: 
     path: "/mnt/cluster/homeassistant"
+  nodered: 
+    host: tseng
+    path: "/var/lib/volumes/node-red"
   influxdb: 
     host: tseng
     path: "/var/lib/volumes/influxdb"

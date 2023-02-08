@@ -9,11 +9,6 @@
   service:
     name: telegraf
     state: reloaded
-- name: Restart Networkd
-  become: true
-  service:
-    name: systemd-networkd
-    state: restarted
 - name: Restart dnsmasq
   become: true
   service:
@@ -24,6 +19,3 @@
   service:
     name: avahi-daemon
     state: restarted
-- name: Update CA certs
-  become: true
-  command: update-ca-certificates

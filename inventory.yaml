@@ -15,24 +15,47 @@ all:
         rude.home.analogrelay.net:
         reno.home.analogrelay.net:
         tseng.home.analogrelay.net:
+    devices:
+      children:
+        hvac:
+          hosts:
+            primarybedroom.hvac.home.analogrelay.net:
+              ansible_host: 192.168.4.4
+            livingroom.hvac.home.analogrelay.net:
+              ansible_host: 192.168.4.5
+        sonos:
+          hosts:
+            livingroom.sonos.home.analogrelay.net:
+              ansible_host: 192.168.4.1
+            recroom.sonos.home.analogrelay.net:
+              ansible_host: 192.168.4.2
+      hosts:
+        lutron.home.analogrelay.net:
+          ansible_host: 192.168.4.3
     workstations:
       children:
-        windows:
+        windows_workstations:
           hosts:
             cloud.home.analogrelay.net:
-              ansible_host: 192.168.1.10
-        macos:
+              ansible_host: 192.168.3.1
+              mac_address: "d4:5d:64:d3:5f:82"
+        linux_workstations:
+          hosts:
+            zach.home.analogrelay.net:
+              ansible_host: 192.168.3.4
+              guest_of: cloud.home.analogrelay.net
+        macos_workstations:
           hosts:
             aerith.home.analogrelay.net:
-              ansible_host: 192.168.1.11
+              ansible_host: 192.168.3.2
               ansible_user: anurse
             sephiroth.home.analogrelay.net:
-              ansible_host: 192.168.1.11
+              ansible_host: 192.168.3.3
               ansible_user: anurse
     consoles:
       hosts:
-        deck.home.analogrelay.net:
-          ansible_host: 192.168.2.100
+        steamdeck.home.analogrelay.net:
+          ansible_host: 192.168.3.5
           ansible_user: deck
     infrastructure:
       children:
@@ -60,11 +83,6 @@ all:
               ansible_host: 192.168.1.3
               orbi_type: router
     servers:
-      vars:
-        node_identified: true
-        node_monitored: true
-        node_storage: true
-        avahi_reflector: true
       children:
         cluster:
           children:
@@ -90,9 +108,9 @@ all:
                   ansible_host: 192.168.2.6
                 tseng.home.analogrelay.net:
                   ansible_host: 192.168.2.7
-                barret.home.analogrelay.net:
-                  ansible_host: 192.168.2.8
     offline:
       hosts:
         wedge.home.analogrelay.net:
           ansible_host: 192.168.2.9
+        barret.home.analogrelay.net:
+          ansible_host: 192.168.2.8

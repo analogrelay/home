@@ -1,6 +1,24 @@
 - name: Configure Data Volumes
   become: true
   block:
+    - name: Create storage group
+      group:
+        name: storage
+        gid: 2000
+        state: present
+
+    - name: Make ashley a member of storage
+      user:
+        name: ashley
+        groups: storage
+        append: true
+
+    - name: Make nobody a member of storage
+      user:
+        name: nobody
+        groups: storage
+        append: true
+
     - name: Ensure Mount Points
       file:
         path: /mnt/backups
@@ -18,6 +36,8 @@
           path: /var/lib/volumes/prometheus
         - host: tseng
           path: /var/lib/volumes/grafana
+        - host: tseng
+          path: /var/lib/volumes/node-red
       file:
         path: "{{ item.path }}"
         state: directory

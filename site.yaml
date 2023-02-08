@@ -2,7 +2,7 @@
 # Whenever a new node is added that needs consul/nomad, we run 'script/refresh-cluster' to run those tags specifically
 ---
 - name: Apply base role
-  hosts: servers
+  hosts: servers:linux_workstations
   roles:
     - role: base
   tags:
@@ -15,6 +15,13 @@
   tags:
     - bootstrap
     - tailnet
+
+- name: Apply node role
+  hosts: servers
+  roles:
+    - role: node
+  tags:
+    - bootstrap
 
 - name: Apply consul role
   hosts: consuls

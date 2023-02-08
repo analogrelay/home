@@ -22,13 +22,13 @@ cp -R $root/cloud-init/* $volume
 echo -n "Enter the simple hostname for this node (without domain): "
 read hostname
 fqdn="$hostname.home.analogrelay.net"
+echo "Ok, I'll set the fqdn of this node to: $fqdn"
+echo "fqdn: $fqdn" >> $volume/user-data
+echo "hostname: $hostname" >> $volume/user-data
 
 if [[ -f $volume/user-data ]]; then
     if ! grep "^fqdn:" $volume/user-data > /dev/null; then
-        echo "Ok, I'll set the fqdn of this node to: $fqdn"
 
-        echo "fqdn: $fqdn" >> $volume/user-data
-        echo "hostname: $hostname" >> $volume/user-data
     fi
 fi
 

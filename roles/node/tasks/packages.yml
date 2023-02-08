@@ -1,19 +1,14 @@
 - name: Configure APT Repos
   become: true
   block:
-    - name: Install transport prereqs
-      apt:
-        pkg:
-          - ca-certificates
-
     - name: Fetch keys
       register: fetch_keys
       get_url:
         url: "{{ item.url }}"
         dest: "/etc/apt/trusted.gpg.d/{{ item.name }}.asc"
       with_items:
-        - url: https://download.docker.com/linux/ubuntu/gpg
-          name: docker
+        - url: https://repos.influxdata.com/influxdb.key
+          name: influxdb
     
     - name: Add repos
       register: add_repos
@@ -22,8 +17,8 @@
         filename: "{{ item.name }}"
         state: present
       with_items:
-        - repo: "deb [arch={{ debian_arch }}] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
-          name: docker
+        - repo: "deb https://repos.influxdata.com/debian stable main"
+          name: influxdb
     
     - name: Update cache
       when: fetch_keys.changed or add_repos.changed
@@ -34,11 +29,7 @@
   become: true
   apt:
     pkg:
-      - unzip
-      - curl
-      - lsb-release
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-compose-plugin
-      - zsh
+      - cifs-utils
+      - dnsmasq
+      - avahi-utils
+      - telegraf

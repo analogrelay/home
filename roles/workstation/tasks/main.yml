@@ -1,6 +1,3 @@
-- name: Configure users
-  import_tasks: users.yml
-
 - name: Install packages
   when: (ansible_distribution_file_variety is defined) and (ansible_distribution_file_variety == "Debian")
   import_tasks: packages.debian.yml

@@ -8,7 +8,6 @@
     with_items:
       - "admin"
       - "docker"
-      - "storage"
 
   - name: Create users
     user:
@@ -21,22 +20,7 @@
     with_items:
       - name: ashley
         comment: Ashley Stanton-Nurse
-        groups: admin, docker, storage
-
-  - name: Clean up old users
-    when: ansible_user != item
-    user:
-      name: "{{ item }}"
-      state: absent
-    with_items:
-      - abby
-
-  - name: Give nobody membership in the storage group
-    user:
-      name: nobody
-      groups: storage
-      append: true
-      create_home: false
+        groups: admin, docker
 
   - name: Configure SSH
     ansible.posix.authorized_key:

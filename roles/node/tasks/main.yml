@@ -1,0 +1,19 @@
+- name: Install packages
+  import_tasks: packages.yml
+
+- name: Configure telegraf
+  import_tasks: telegraf.yml
+
+- name: Configure node_exporter
+  import_tasks: node_exporter.yml
+
+- name: Configure storage volumes
+  import_tasks: volumes.yml
+
+- name: Place avahi config
+  become: true
+  copy:
+    src: avahi-daemon.conf
+    dest: /etc/avahi/avahi-daemon.conf
+  notify: 
+    - Restart Avahi

@@ -16,7 +16,7 @@ function processInventoryGroup(root: any) {
     if (typeof root.hosts === "object") {
         for (const hostName in root.hosts) {
             if (hostName.endsWith(".home.analogrelay.net")) {
-                const shortName = hostName.split(".")[0];
+                const shortName = hostName.substring(0, hostName.length - ".home.analogrelay.net".length);
                 const hostObj = root.hosts[hostName];
                 if (hostObj) {
                     let hostCfg = inventoryHosts[shortName] || { ips: [], tailnet: false };
@@ -39,7 +39,7 @@ processInventoryGroup(inventory.all);
 
 for (const hostName in inventory.all.children.tailnet.hosts) {
     if (hostName.endsWith(".home.analogrelay.net")) {
-        const shortName = hostName.split(".")[0];
+        const shortName = hostName.substring(0, hostName.length - ".home.analogrelay.net".length);
         if (inventoryHosts[shortName]) {
             inventoryHosts[shortName].tailnet = true;
         }
