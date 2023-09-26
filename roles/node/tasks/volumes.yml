@@ -21,7 +21,7 @@
 
     - name: Ensure Mount Points
       file:
-        path: /mnt/backups
+        path: "{{ item }}"
         state: directory
       with_items:
         - "/mnt/cluster"
@@ -38,6 +38,8 @@
           path: /var/lib/volumes/grafana
         - host: tseng
           path: /var/lib/volumes/node-red
+        - host: tseng
+          path: /var/lib/volumes/homedb
       file:
         path: "{{ item.path }}"
         state: directory

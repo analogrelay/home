@@ -89,3 +89,13 @@
         name: nomad
         enabled: true
         state: started
+
+- name: Configure Telegraf
+  become: true
+  block:
+    - name: Install config files
+      copy:
+        src: telegraf.d/
+        dest: /etc/telegraf/telegraf.d
+      notify:
+        - Reload telegraf

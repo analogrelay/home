@@ -9,36 +9,72 @@ all:
       # Nodes that are in the tailnet
       hosts:
         jessie.home.analogrelay.net:
-        tifa.home.analogrelay.net:
-        barret.home.analogrelay.net:
+        # tifa.home.analogrelay.net:
+        # barret.home.analogrelay.net:
         # wedge.home.analogrelay.net:
-        rude.home.analogrelay.net:
+        # rude.home.analogrelay.net:
         reno.home.analogrelay.net:
         tseng.home.analogrelay.net:
     devices:
+      hosts:
+        lutron.dev.home.analogrelay.net:
+          ansible_host: 192.168.4.3
+          physical_addr: "E0:62:34:43:32:67"
+        hatch.dev.home.analogrelay.net:
+          physical_addr: "24:62:AB:BC:A6:A8"
+          ansible_host: 192.168.4.10
+        levoit.dev.home.analogrelay.net:
+          physical_addr: "9C:9C:1F:2A:B3:9C"
+          ansible_host: 192.168.4.11
+        arlovmb.dev.home.analogrelay.net:
+          physical_addr: "A4:11:62:B3:04:79"
+          ansible_host: 192.168.4.12
+        echobee.dev.home.analogrelay.net:
+          physical_addr: "44:61:32:6F:73:EB"
+          ansible_host: 192.168.4.14
       children:
         hvac:
           hosts:
-            primarybedroom.hvac.home.analogrelay.net:
+            primarybedroom.hvac.dev.home.analogrelay.net:
               ansible_host: 192.168.4.4
-            livingroom.hvac.home.analogrelay.net:
+              physical_addr: "24:A1:60:30:33:6A"
+              ping_me: true
+            livingroom.hvac.dev.home.analogrelay.net:
               ansible_host: 192.168.4.5
+              physical_addr: "24:A1:60:2F:C1:AD"
+              ping_me: true
+        hue:
+          hosts:
+            hue.dev.home.analogrelay.net:
+              ansible_host: 192.168.4.8
+              physical_addr: "EC:B5:FA:21:93:5C"
+        tv:
+          hosts:
+            roku.tv.dev.home.analogrelay.net:
+              ansible_host: 192.168.4.9
+              physical_addr: "C4:98:5C:0D:16:7F"
+            vizio.tv.dev.home.analogrelay.net:
+              ansible_host: 192.168.4.13
+              physical_addr: "2C:64:1F:1B:94:4B"
         sonos:
           hosts:
             livingroom.sonos.home.analogrelay.net:
               ansible_host: 192.168.4.1
             recroom.sonos.home.analogrelay.net:
               ansible_host: 192.168.4.2
-      hosts:
-        lutron.home.analogrelay.net:
-          ansible_host: 192.168.4.3
+        cameras:
+          hosts:
+            frontdoorbell.cam.home.analogrelay.net:
+              ansible_host: 192.168.4.7
+              physical_addr: "9C:8E:CD:3C:E1:BF"
     workstations:
       children:
         windows_workstations:
           hosts:
             cloud.home.analogrelay.net:
               ansible_host: 192.168.3.1
-              mac_address: "d4:5d:64:d3:5f:82"
+              physical_addr: "d4:5d:64:d3:5f:82"
+              ping_me: true
         linux_workstations:
           hosts:
             zach.home.analogrelay.net:
@@ -49,14 +85,21 @@ all:
             aerith.home.analogrelay.net:
               ansible_host: 192.168.3.2
               ansible_user: anurse
+              physical_addr: "3C:A6:F6:58:0D:BF"
+              ping_me: true
             sephiroth.home.analogrelay.net:
               ansible_host: 192.168.3.3
               ansible_user: anurse
+              physical_addr: "64:4B:F0:13:98:B9"
+              ping_me: true
     consoles:
       hosts:
         steamdeck.home.analogrelay.net:
           ansible_host: 192.168.3.5
           ansible_user: deck
+        xboxone.home.analogrelay.net:
+          ansible_host: 192.168.3.6
+          physical_addr: "50:1A:C5:B4:AA:19"
     infrastructure:
       children:
         synology:
@@ -64,24 +107,36 @@ all:
             is_synology: true
           hosts:
             cid.home.analogrelay.net:
+              physical_addr: "00:11:32:24:87:9d"
               ansible_host: 192.168.1.5
               ansible_user: anurse
+              ping_me: true
         openwrt:
-          hosts:
-            gaia.home.analogrelay.net:
-              ansible_host: 192.168.1.1
-              ansible_user: root
-            wutai.home.analogrelay.net:
-              ansible_host: 192.168.1.2
-              ansible_user: root
+          children:
+            gateway:
+              hosts:
+                gaia.home.analogrelay.net:
+                  ansible_host: 192.168.1.1
+                  ansible_user: root
+            satellite:
+              hosts:
+                wutai.home.analogrelay.net:
+                  physical_addr: "C4:41:1E:36:EB:30"
+                  ansible_host: 192.168.1.2
+                  ansible_user: root
+                  ping_me: true
         orbi:
           hosts:
             kalm.home.analogrelay.net:
+              physical_addr: "38:94:ED:5D:8D:2E"
               ansible_host: 192.168.1.4
               orbi_type: extender
+              ping_me: true
             midgar.home.analogrelay.net:
+              physical_addr: "38:94:ED:61:A3:28"
               ansible_host: 192.168.1.3
               orbi_type: router
+              ping_me: true
     servers:
       children:
         cluster:
@@ -98,19 +153,27 @@ all:
               hosts:
                 jessie.home.analogrelay.net:
                   ansible_host: 192.168.2.1
+                  physical_addr: "E4:5F:01:46:2A:77"
+                  ping_me: true
             workers:
               hosts:
-                tifa.home.analogrelay.net:
-                  ansible_host: 192.168.2.2
-                rude.home.analogrelay.net:
-                  ansible_host: 192.168.2.5
                 reno.home.analogrelay.net:
                   ansible_host: 192.168.2.6
+                  physical_addr: "B8:27:EB:0C:A3:D8"
+                  ping_me: true
                 tseng.home.analogrelay.net:
                   ansible_host: 192.168.2.7
+                  physical_addr: "7C:C2:C6:45:A8:30"
+                  ping_me: true
+                tifa.home.analogrelay.net:
+                  ansible_host: 192.168.2.2
+                  physical_addr: "E4:5F:01:46:2A:86"
+                  ping_me: true
     offline:
       hosts:
         wedge.home.analogrelay.net:
           ansible_host: 192.168.2.9
         barret.home.analogrelay.net:
           ansible_host: 192.168.2.8
+        rude.home.analogrelay.net:
+          ansible_host: 192.168.2.5

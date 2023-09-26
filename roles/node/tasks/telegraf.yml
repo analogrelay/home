@@ -10,6 +10,11 @@
       notify:
         - Reload telegraf
 
+    - name: Ensure Config Directory
+      file:
+        path: /etc/telegraf
+        state: directory
+
     - name: Install root config
       template:
         src: telegraf.conf.j2

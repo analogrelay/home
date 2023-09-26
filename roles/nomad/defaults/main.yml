@@ -44,3 +44,6 @@ nomad_volumes:
   prometheus:
     host: tseng
     path: "/var/lib/volumes/prometheus"
+  homedb:
+    host: tseng
+    path: "/var/lib/volumes/homedb"

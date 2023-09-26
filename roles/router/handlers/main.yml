@@ -1,0 +1,11 @@
+---
+- name: Restart DNSmasq
+  become: true
+  service:
+    name: dnsmasq
+    state: restarted
+- name: Restart Tailscale
+  become: true
+  service:
+    name: tailscale
+    state: restarted

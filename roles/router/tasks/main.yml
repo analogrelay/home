@@ -1,0 +1,40 @@
+- name: Update OPKG Cache
+  command: "opkg update"
+
+- name: Install prerequisites
+  community.general.opkg:
+    name: "{{ item }}"
+  with_items:
+    - "python3"
+    - "python3-pip"
+    - "openssh-sftp-server"
+    - "tailscale"
+
+- name: Install Python packages
+  pip:
+    name: "{{ item }}"
+  with_items:
+    - "hvac"
+    - "hvac[parser]"
+
+- name: Install System Config
+  become: true
+  copy:
+    src: config/system
+    dest: /etc/config/system
+
+- name: Install DHCP Config 
+  become: true
+  template:
+    src: dhcp.j2
+    dest: /etc/config/dhcp
+  notify:
+    - Restart DNSmasq
+
+- name: Install Tailscale Config
+  become: true
+  copy:
+    src: config/tailscale
+    dest: /etc/config/tailscale
+  notify:
+    - Restart Tailscale

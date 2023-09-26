@@ -21,19 +21,14 @@ job "traefik" {
                 to = "443"
                 host_network = "local"
             }
-            port "tailnet-http" {
-                static = "80"
-                to = "80"
-                host_network = "tailnet"
-            }
-            port "tailnet-https" {
-                static = "443"
-                to = "443"
-                host_network = "tailnet"
-            }
             port "mqtt" {
                 static = "1883"
                 to = "1883"
+                host_network = "local"
+            }
+            port "postgres" {
+                static = "5432"
+                to = "5432"
                 host_network = "local"
             }
         }
@@ -53,11 +48,16 @@ job "traefik" {
             port = "mqtt"
         }
 
+        service {
+            name = "traefik-postgres"
+            port = "postgres"
+        }
+
         task "traefik" {
             driver = "docker"
             config {
                 image = "traefik:v2.9"
-                ports = [ "http", "https", "mqtt", "tailnet-http", "tailnet-https" ]
+                ports = [ "http", "https", "mqtt", "postgres" ]
 
                 volumes = [
                     "local/traefik.yaml:/etc/traefik/traefik.yaml",
@@ -82,6 +82,8 @@ entryPoints:
         address: ":443"
     mqtt:
         address: ":1883"
+    postgres:
+        address: ":5432"
 providers:
     file:
         directory: "/etc/traefik/conf.d"

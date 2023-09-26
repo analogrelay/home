@@ -36,6 +36,10 @@ job "homeassistant" {
         }
 
         task "homeassistant" {
+            vault {
+                policies = ["read-kv-homedb", "read-kv-homeassistant"]
+            }
+
             driver = "docker"
             env {
                 TZ = "America/Vancouver"
@@ -52,6 +56,14 @@ job "homeassistant" {
             resources {
                 cpu = 100
                 memory = 600
+            }
+            template {
+                data = <<EOH
+RECORDER_DB_URL=postgresql://homeassistant:{{ with secret "kv/data/services/homedb/users/homeassistant" }}{{ .Data.data.password }}{{ end }}@home.analogrelay.net/homeassistant
+INFLUX_TOKEN={{ with secret "kv/data/services/homeassistant" }}{{ .Data.data.influx_token }}{{ end }}
+EOH
+                destination = "secrets/.env"
+                env = true
             }
         }
     }

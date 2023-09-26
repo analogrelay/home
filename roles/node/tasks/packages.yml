@@ -7,8 +7,8 @@
         url: "{{ item.url }}"
         dest: "/etc/apt/trusted.gpg.d/{{ item.name }}.asc"
       with_items:
-        - url: https://repos.influxdata.com/influxdb.key
-          name: influxdb
+        - url: https://repos.influxdata.com/influxdata-archive_compat.key
+          name: influxdata-archive_compat
     
     - name: Add repos
       register: add_repos

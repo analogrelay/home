@@ -4,3 +4,8 @@
   service:
     name: nomad
     state: restarted
+- name: Reload telegraf
+  become: true
+  service:
+    name: telegraf
+    state: reloaded

@@ -1,6 +1,20 @@
 # By default, we skip some tags to avoid messing with the existing consul/nomad clusters
 # Whenever a new node is added that needs consul/nomad, we run 'script/refresh-cluster' to run those tags specifically
 ---
+- name: Apply router role
+  hosts: gateway
+  roles:
+    - role: router
+  tags:
+    - topology
+
+- name: Apply node role
+  hosts: servers
+  roles:
+    - role: node
+  tags:
+    - bootstrap
+
 - name: Apply base role
   hosts: servers:linux_workstations
   roles:
@@ -15,13 +29,6 @@
   tags:
     - bootstrap
     - tailnet
-
-- name: Apply node role
-  hosts: servers
-  roles:
-    - role: node
-  tags:
-    - bootstrap
 
 - name: Apply consul role
   hosts: consuls
